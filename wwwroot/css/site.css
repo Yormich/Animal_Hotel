@@ -1,22 +1,41 @@
-html {
-  font-size: 14px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
+@keyframes shadowAnimation {
+  100% {
+    box-shadow: calc(var(--index) * 0.5);
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  background-color: var(--color-light);
+}
+
+header {
+  /* height: calc(var(--index) * 4.5); */
+  height: calc(var(--index) * 25);
+}
+
+.nav {
+  background-color: rgb(255, 255, 255);
+  display: block;
+  height: calc(var(--index) * 4.5);
+  width: 100%;
+  z-index: 5;
+  /* position: sticky; */
+}
+
+.shadow {
+  animation-name: shadowAnimation;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+}
+
+footer {
+  display: block;
+  height: calc(var(--index) * 12);
+  width: 100%;
 }
