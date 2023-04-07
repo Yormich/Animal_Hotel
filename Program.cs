@@ -1,10 +1,17 @@
-var builder = WebApplication.CreateBuilder(args);
+using Animal_Hotel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text.Encodings;
+using System.Runtime.CompilerServices;
+using System.Text;
+using Animal_Hotel.Services;
 
-builder.Services.AddControllersWithViews();
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.ConfigureServices(builder.Configuration);
 
 var app = builder.Build();
 
-
+app.ConfigureMiddlewares();
 
 //don't use any other exception handler until end 
 if (!app.Environment.IsDevelopment())
@@ -14,20 +21,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 
-//enable secured http redirection and file extraction from wwwroot
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.Map("/", (HttpContext context) =>
+{
+    context.Response.Redirect("AnimalHotel");
+});
 
-//use routing middleware
-app.UseRouting();
-
-//middlewares for modules and login
-app.UseAuthentication();
-app.UseAuthorization();
-
-//default route
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "main",
+    pattern: "{AnimalHotel}/{action=Index}",
+    defaults: new {controller = "Home", action = "Index"});
 
 app.Run();
