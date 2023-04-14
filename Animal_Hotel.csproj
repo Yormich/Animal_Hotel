@@ -20,9 +20,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Views\Home\Index.cshtml">
+    <Content Update="Views\Shared\Index.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\img\user_images\" />
   </ItemGroup>
 
 </Project>

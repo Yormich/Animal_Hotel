@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -30,13 +31,17 @@ namespace Animal_Hotel.Services
 
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.IdleTimeout = TimeSpan.FromHours(2);
             });
             services.AddHttpContextAccessor();
 
+            services.AddSingleton<IIFileProvider, BaseFileProvider>();
             //Database services
             services.AddDbContext<AnimalHotelDbContext>();
             services.AddSingleton<IDbConnectionProvider, MsSqlConnectionProvider>();
+            services.AddScoped<IUserLoginInfoService, UserLoginInfoService>();
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IUserRegisterService, UserRegisterService>();
         }
     }
 }

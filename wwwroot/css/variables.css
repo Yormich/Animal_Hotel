@@ -4,6 +4,7 @@
   --color-secondary: #2c7ba3f4;
   --color-light: #f3f3f3;
   --color-dark: #1b2020;
+  --error-color: rgb(235, 41, 41);
   --gradient-primary: linear-gradient(
     to bottom right,
     var(--color-primary),

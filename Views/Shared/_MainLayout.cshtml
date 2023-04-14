@@ -4,32 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta lang="en-US">
-    <link rel="stylesheet" href="/css/site.css">
+    
     <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/site.css">
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">    
     <link rel="shortcut icon" href="/img/image_placeholder.png">
 
     <script defer type="module" src="/js/site.js"></script>
+    @if (IsSectionDefined("ScriptsAndStylesheets"))
+    {
+        RenderSection("ScriptsAndStylesheets");
+    }
     <title>Animal Hotel</title>
 </head>
 <body>
-    <header>
-        <nav class="nav">
-            NavBar
-            <div>
-
-            </div>
-            <div>
-
-            </div>
-        </nav>
-    </header>
-    <div>
+    <nav class="nav">
+        <a class="nav__logo--wrapper" asp-action="Index" asp-controller="AnimalHotel">
+            <img class="nav__logo" src="/img/image_placeholder.png" alt="Animal Hotel Home Image">
+            <span class="nav__title">Animal Hotel</span>
+        </a>
+        <ul class="nav__items">
+            <li class="nav__item">
+                <a class="nav__link">Features</a>
+            </li>
+            <li class="nav__item">
+                <a class="nav__link">Pricing</a>
+            </li>
+            <li class="nav__item">
+                <a class="nav__link">Rooms</a>
+            </li>
+            <li class="nav__item">
+                <a class="nav__link btn nav__login">Login</a>
+            </li>
+        </ul>
+    </nav>
+    <div id="body">
         @RenderBody()
     </div>
-    <footer>
-        <div></div>
-        Footer
+    <footer id="footer">
+        @if(IsSectionDefined("Footer"))
+        {
+            RenderSection("Footer");
+        }
+        else 
+        {
+            <div class="footer__main">            
+                <div class="footer__acc-sec">
+                    <a asp-action="Register" asp-controller="LoginAndRegister" 
+                    class="btn footer__create">Create you free account today!</a>
+                </div>
+                    <ul class="footer__links">
+                        <li class="footer__item">
+                            <a class="footer__link">Rooms</a>
+                        </li>
+                        <li class="footer__item">
+                            <a class="footer__link">Pricing</a>
+                        </li>
+                        <li class="footer__item">
+                            <a class="footer__link">Privacy Policy</a>
+                        </li>
+                        <li class="footer__item">
+                            <a class="footer__link">Contact Us</a>
+                        </li>
+                    </ul>
+                    <img class="footer__logo" src="/img/image_placeholder.png" alt="Footer Logo Image">
+
+                    <div class="copyright__info">
+                        &#169; This is a course project made by 
+                        <a class="github__link" href="https://github.com/Yormich/Animal_Hotel">
+                            Riabov Dmytro
+                        </a> 
+                        by the Database Organization discipline 
+                        for the National University of Onu named after I.I Mechnikov
+                    </div>
+            </div>
+        }
     </footer>
 </body>
 </html>

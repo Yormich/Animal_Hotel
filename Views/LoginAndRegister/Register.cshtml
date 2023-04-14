@@ -1,0 +1,83 @@
+﻿@model ClientRegisterModel;
+
+@{
+    Layout = "_NoLoginLayout";
+}
+
+@functions 
+{
+    string DateToHtmlFormatter(DateTime date)
+    {
+        date = date == default(DateTime) ? DateTime.Now : date;
+        string year = date.Year.ToString();
+        year.PadLeft(4, '0');
+        string month = date.Month.ToString().PadLeft(2, '0');
+        string day = date.Day.ToString().PadLeft(2, '0');
+        string htmlDate = $"{year}-{month}-{day}";
+        return htmlDate;
+    }
+}
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="/css/register.css"/>
+    <script defer type="module" src="/js/register.js"></script>
+}
+
+<body>
+    <div class="main-wrapper">
+        <div class="register-form-wrapper">
+            <form class="register-form" asp-action="ConfirmClientRegistration" asp-controller="LoginAndRegister" method="post" enctype="multipart/form-data">
+                <div class="form-inputs-container">
+                    <label id="login-lbl" class="register__form-lbl" asp-for="Login">Email*</label>
+                    <input id="login-input" class="form__input-txt" asp-for="Login" type="text" value="@Model.Login"/>
+                    <span id="login-validator" class="register__validation-span" asp-validation-for="Login"></span>
+
+                    <label id="phone-lbl" class="register__form-lbl" asp-for="PhoneNumber">Phone Number*</label>
+                    <input id="phone-input" class="form__input-txt" asp-for="PhoneNumber" type="tel" value="@Model.PhoneNumber"/>
+                    <span id="phone-validator" class="register__validation-span" asp-validation-for="PhoneNumber"></span>
+
+                    <label id="password-lbl" class="register__form-lbl" asp-for="Password">Password*</label>
+                    <input id="password-input" class="form__input-txt" asp-for="Password" type="password" />
+                    <span id="password-validator" class="register__validation-span" asp-validation-for="Password"></span>
+
+                    <label id="password__repeat-lbl" class="register__form-lbl" asp-for="RepeatedPassword">Password Repeat*</label>
+                    <input id="password__repeat-input" class="form__input-txt" asp-for="RepeatedPassword" type="password" />
+                    <span id="password__repeat-validator" class="register__validation-span" asp-validation-for="RepeatedPassword"></span>
+
+                    <label id="firstname-lbl" class="register__form-lbl" asp-for="FirstName">First Name*</label>
+                    <input id="firstname-input" class="form__input-txt" asp-for="FirstName" type="text" value="@Model.FirstName"/>
+                    <span id="firstname-validator" class="register__validation-span" asp-validation-for="FirstName"></span>
+
+                    <label id="lastname-lbl" class="register__form-lbl" asp-for="LastName">Last Name*</label>
+                    <input id="lastname-input" class="form__input-txt" asp-for="LastName" type="text" value="@Model.LastName"/>
+                    <span id="lastname-validator" class="register__validation-span" asp-validation-for="LastName"></span>
+
+                    <label id="birth__date-lbl" class="register__form-lbl" asp-for="BirthDate">Birth Date*</label>
+                    <input id="birth__date-input" class="form__input-date" asp-for="BirthDate" type="date" 
+                        value="@(DateToHtmlFormatter(Model.BirthDate))"/>
+                    <span id="birth__date-validator" class="register__validation-span" asp-validation-for="BirthDate"></span>
+
+                    <label id="card-lbl" class="register__form-lbl" asp-for="CardNumber">Card Number</label>
+                    <input id="card-input" class="form__input-txt" asp-for="CardNumber" type="text" value="@Model.CardNumber"/>
+                    <span id="card-validator" class="register__validation-span" asp-validation-for="CardNumber"></span>
+
+                    <label id="photo-lbl" class="register__form-lbl" asp-for="PhotoPath">Your Photo</label>
+                    <label for="photo-input" class="for_input-file">
+                        Upload your photo<br/>
+                        by clicking on that input<br />
+                        <span class="small__text-blue">+</span>
+                    </label>
+                    <input id="photo-input" class="form__input-file" asp-for="PhotoPath" type="file" accept="image/png, image/jpeg"/>
+                    <span id="photo-validator" asp-validation-for="PhotoPath"></span>
+                </div>
+
+                <div class="register__message-required">
+                    * Indicates required fields
+                </div>
+
+                <button class="btn-register btn" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+</body>

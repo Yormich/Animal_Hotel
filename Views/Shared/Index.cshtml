@@ -4,6 +4,11 @@
     ViewData["Title"] = "Home Page";
 }
 
+@functions{
+    string GetClassByModelState(HomePageViewModel state) => state.IsTriedToLogin ? "" : "hidden";
+}
+
+
 @section ScriptsAndStylesheets
 {
     <link rel="stylesheet" href="/css/home_page.css"/>
@@ -28,27 +33,23 @@
     <section id="section--2">
         
     </section>
-    @* TODO:
-             create register page, 
-             define viewmodel that can handle all passed to main page info,
-             define viewmodel for register page and handle validation,
-    *@
-    <div class="modal hidden">
+
+    <div class="modal @GetClassByModelState(Model)">
         <button class="modal__close-btn">X</button>
         <h4 class="modal__h4">Enter into your <span class="text-highlight">animal hotel</span> account</h4>
         <form class="modal__form" asp-action="Login" asp-controller="LoginAndRegister" method="post">
             <input type="hidden" />
             <label id="login-lbl" class="form__label" asp-for="Login">Login</label>
-            <input id="login-input" class="form__input" asp-for="Login" type="text" placeholder="Please enter your email">
-            <span  id="login-validator" asp-validation-for="Login"></span>
+            <input id="login-input" class="form__input" asp-for="Login" type="text" placeholder="Email or phone number" value="@Model.Login">
+            <span id="login-validator" asp-validation-for="Login"></span>
 
-            <label class="form__label" asp-for="Password">Password</label>
-            <input class="form__input" asp-for="Password" type="password">
+            <label id="password-input" class="form__label" asp-for="Password">Password</label>
+            <input id="password-input" class="form__input" asp-for="Password" type="password">
             <span id="password-validator" asp-validation-for="Password"></span>
-
+                
             <button class="btn btn-submit btn-login" type="submit">Enter into account</button>
         </form>
         <a id="modal__register-link" asp-action="Register" asp-controller="LoginAndRegister">Don't have an account? Create new</a>
     </div>
-    <div class="overlay hidden"></div>
+    <div class="overlay @GetClassByModelState(Model)"></div>
 </body>

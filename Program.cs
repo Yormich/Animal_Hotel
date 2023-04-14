@@ -23,12 +23,10 @@ if (!app.Environment.IsDevelopment())
 
 app.Map("/", (HttpContext context) =>
 {
-    context.Response.Redirect("AnimalHotel");
+    context.Response.Redirect("Login/Register");
 });
 
 app.MapControllerRoute(
     name: "main",
-    pattern: "{AnimalHotel}/{action=Index}",
-    defaults: new {controller = "Home", action = "Index"});
-
+    pattern: "{controller}/{action}");
 app.Run();
