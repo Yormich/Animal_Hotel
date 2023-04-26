@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject ClaimHelper claimHelper
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -32,8 +34,17 @@
                 <a class="nav__link">Pricing</a>
             </li>
             <li class="nav__item">
-                <a class="nav__link">Rooms</a>
+                <a class="nav__link" asp-action="Rooms" asp-controller="AnimalHotel">Rooms</a>
             </li>
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <li class="nav__item">
+                    <a asp-action="UserProfile" asp-controller="UserProfile"
+                   asp-route-userId="@(claimHelper.GetClaimValue(ClaimTypes.Sid))">
+                        <img class="profile-img" src="~/img/image_placeholder.png">
+                    </a>
+                </li>
+            }
         </ul>
     </nav>
     <div id="body">
@@ -47,6 +58,15 @@
         else
         {
             <div class="footer__main">
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <h3 class="welcome__header">Welcome, @(claimHelper.GetClaimValue(ClaimTypes.Name))</h3>
+                }
+                else
+                {
+                    <a asp-action="Register" asp-controller="LoginAndRegister"
+                       class="btn footer__create">Create you free account today!</a>
+                }
                 <ul class="footer__links">
                     <li class="footer__item">
                         <a class="footer__link">Rooms</a>

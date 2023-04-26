@@ -6,6 +6,9 @@
         {
             app.UseSession();
 
+            app.UseMiddleware<AuthenticationRequestMiddleware>();
+            //app.UseFileServer();
+
             //enable secured http redirection and file extraction from wwwroot
             app.UseHttpsRedirection();
 

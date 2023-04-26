@@ -1,11 +1,8 @@
 ﻿@model HomePageViewModel;
 
-@{
-    ViewData["Title"] = "Home Page";
-}
 
-@functions{
-    string GetClassByModelState(HomePageViewModel state) => state.IsTriedToLogin ? "" : "hidden";
+@{
+    int reviewAmount = Model.Reviews.Count;
 }
 
 
@@ -33,23 +30,43 @@
     <section id="section--2">
         
     </section>
-
-    <div class="modal @GetClassByModelState(Model)">
-        <button class="modal__close-btn">X</button>
-        <h4 class="modal__h4">Enter into your <span class="text-highlight">animal hotel</span> account</h4>
-        <form class="modal__form" asp-action="Login" asp-controller="LoginAndRegister" method="post">
-            <input type="hidden" />
-            <label id="login-lbl" class="form__label" asp-for="Login">Login</label>
-            <input id="login-input" class="form__input" asp-for="Login" type="text" placeholder="Email or phone number" value="@Model.Login">
-            <span id="login-validator" asp-validation-for="Login"></span>
-
-            <label id="password-input" class="form__label" asp-for="Password">Password</label>
-            <input id="password-input" class="form__input" asp-for="Password" type="password">
-            <span id="password-validator" asp-validation-for="Password"></span>
-                
-            <button class="btn btn-submit btn-login" type="submit">Enter into account</button>
-        </form>
-        <a id="modal__register-link" asp-action="Register" asp-controller="LoginAndRegister">Don't have an account? Create new</a>
-    </div>
-    <div class="overlay @GetClassByModelState(Model)"></div>
+    <section class="section" id="section--3">
+        <div class="section__title-reviews">
+            <h5 class="section__reviews-s_header">To make you fully determined</h5>
+            <h2 class="section__reviews-b_header">Read <span class="text-highlight">Animal Hotel</span> last reviews.</h2>
+        </div>
+        <div class="slider">
+            @{
+                int i = 0;
+                @foreach(var review in Model.Reviews)
+                {
+                    <div class="slide slide--@(i + 1)" style="transform: translateX(@($"{100 * i}%"))">
+                        <div class="review">
+                            <div class="review__header">
+                                <div class="review__user-info">
+                                    <img class="slide__user-img" src="~/img/image_placeholder.png">
+                                    <h5 class="slide__user-name">@($"{review.Client.FirstName} {review.Client.LastName}")</h5>
+                                </div>
+                                <div class="review__rating">
+                                    @review.Rating / 10
+                                </div>
+                            </div>
+                            <div class="review__user-comment">
+                                 @($"{review.Comment}")
+                            </div>
+                        </div>
+                    </div>
+                    i++;
+                }
+            }
+            <button class="slider__btn slider__btn-left">&#8592;</button>
+            <button class="slider__btn slider__btn-right">&#8594;</button>
+            <div class="dots">
+                @for(int j = 0; j < reviewAmount; j++) 
+                {
+                    <button class="dots__dot" data-slide="@(j)"></button>
+                }
+            </div>
+        </div>
+    </section>
 </body>

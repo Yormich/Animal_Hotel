@@ -19,15 +19,46 @@ namespace Animal_Hotel.Controllers
     {
         private readonly ILogger<AnimalHotelController> _logger;
         private readonly IReviewService _reviewService;
-        public AnimalHotelController(IReviewService reviewService, ILogger<AnimalHotelController> logger)
+        private readonly IRoomService _roomService;
+
+        public AnimalHotelController(IReviewService reviewService, IRoomService roomService, ILogger<AnimalHotelController> logger)
         {
             _logger = logger;
             _reviewService = reviewService;
+            _roomService = roomService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            HomePageViewModel model = new HomePageViewModel();
+            HomePageViewModel model = new HomePageViewModel()
+            {
+                ToView = "Index",
+                Reviews = await _reviewService.GetLastReviews(5),
+            };
+
             return View(model);
+        }
+
+        public async Task<ViewResult> Rooms(int? pageIndex, bool? isNotAuthorized)
+        {
+            int index = pageIndex ?? 1, pageSize = 5;
+            var rooms = await _roomService.GetRoomsByPageIndex(index, pageSize);
+            HomePageViewModel model = new HomePageViewModel()
+            {
+                ToView = "Rooms",
+                Rooms = new PaginatedList<Room>(rooms, await _roomService.GetRoomsCountAsync(), index, pageSize),
+                IsTriedToLogin = isNotAuthorized ?? false
+            };
+            return View(model);
+        }
+
+        public async Task<IActionResult> Room(int roomId)
+        {
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return RedirectToAction("Rooms", new { isNotAuthorized = true });
+            }
+
+            return View("Room");
         }
 
         public IActionResult Privacy()

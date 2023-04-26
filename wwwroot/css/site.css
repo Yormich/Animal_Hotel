@@ -12,6 +12,7 @@
 
 html {
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 body {
@@ -29,6 +30,7 @@ body {
   padding: 0 6rem;
   width: 100%;
   z-index: 100;
+  overflow: hidden;
   /* position: sticky; */
 }
 
@@ -76,6 +78,21 @@ body {
 .nav__link:link {
   text-decoration: none;
   color: #272727;
+}
+
+.profile-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(var(--index) * 2.2);
+  height: calc(var(--index) * 2.2);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.profile-img:hover {
+  border-radius: 25%;
+  border: 1px solid #272727;
 }
 
 .btn {
@@ -164,6 +181,10 @@ body {
 .footer__link:visited {
   text-decoration: none;
   color: rgb(255, 255, 255);
+}
+
+.welcome__header {
+  font-size: 1.3rem;
 }
 
 .copyright__info {

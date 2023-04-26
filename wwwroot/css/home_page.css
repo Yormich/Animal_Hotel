@@ -57,3 +57,138 @@ header {
   border-bottom: 2px solid var(--color-secondary);
   color: var(--color-secondary);
 }
+
+.section {
+  border-top: 1px solid #ddd;
+  padding: calc(var(--index) * 3) calc(var(--index) * 3);
+}
+
+.section__title-reviews {
+  margin-left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6%;
+}
+
+.section__reviews-s_header {
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.section__reviews-b_header {
+  font-weight: 500;
+  font-size: 2.5rem;
+  padding-top: var(--index);
+}
+
+.slider {
+  position: relative;
+  margin: 0 auto;
+  max-width: calc(var(--index) * 50);
+  min-height: calc(var(--index) * 20);
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--index) * 20);
+  transition: transform 1.2s;
+}
+
+.review {
+  width: 65%;
+  height: 100%;
+}
+
+.review::before {
+}
+
+.review__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review__user-info {
+  display: flex;
+  align-items: center;
+}
+
+.slide__user-img {
+  border-radius: calc(var(--index) * 3);
+  width: calc(var(--index) * 3);
+  height: calc(var(--index) * 3);
+}
+
+.slide__user-name {
+  margin-left: var(--index);
+  font-size: 1.2rem;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 2px;
+}
+
+.review__user-comment {
+  padding-top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-weight: 400;
+  font-size: 1.1rem;
+}
+
+.review__rating {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.slider__btn {
+  background-color: white;
+  border: none;
+  border-radius: calc(var(--index) * 3);
+  color: #333;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: calc(var(--index) * 3);
+  height: calc(var(--index) * 3);
+}
+
+.slider__btn-right {
+  right: 6%;
+  transform: translate(50%, -50%);
+}
+
+.slider__btn-left {
+  left: 6%;
+  transform: translate(-50%, -50%);
+}
+
+.dots {
+  position: absolute;
+  transform: translateX(-100%);
+  display: flex;
+  bottom: 5%;
+  left: 50%;
+  width: min-content;
+}
+
+.dots__dot {
+  border: none;
+  background-color: #b9b9b9;
+  cursor: pointer;
+  border-radius: calc(var(--index) * 3);
+  opacity: 0.7;
+  min-height: calc(var(--index) * 0.65);
+  min-width: calc(var(--index) * 0.65);
+  margin-right: 20%;
+}
+
+.dots__dot-active {
+  background-color: #888;
+  opacity: 1;
+}

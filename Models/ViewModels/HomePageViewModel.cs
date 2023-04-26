@@ -12,9 +12,13 @@ namespace Animal_Hotel.Models.ViewModels
         [Required(ErrorMessage = "Please enter password to proceed")]
         [MinLength(8, ErrorMessage = "Password should contain at least 8 characters")]
         public string Password { get; set; } = string.Empty;
-
-        public IEnumerable<Review> Reviews { get; set; } = Enumerable.Empty<Review>();
+        public string ToView { get; set; } = string.Empty;
 
         public bool IsTriedToLogin { get; set; } = false;
+
+        public List<Review> Reviews { get; set; } = new();
+
+        public PaginatedList<Room>? Rooms { get; set; }
+
     }
 }

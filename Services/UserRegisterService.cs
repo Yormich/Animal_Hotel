@@ -1,4 +1,4 @@
-﻿using Animal_Hotel.Models.ViewModels;
+﻿using Animal_Hotel.Models.ViewModels.RegisterViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data.Common;

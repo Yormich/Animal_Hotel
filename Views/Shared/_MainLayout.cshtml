@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@model HomePageViewModel
+@inject ClaimHelper claimHelper
+
+@functions {
+    string GetClassByModelState(HomePageViewModel state) => state.IsTriedToLogin ? "" : "hidden";
+}
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -32,15 +39,45 @@
                 <a class="nav__link">Pricing</a>
             </li>
             <li class="nav__item">
-                <a class="nav__link">Rooms</a>
+                <a class="nav__link" asp-action="Rooms" asp-controller="AnimalHotel">Rooms</a>
             </li>
             <li class="nav__item">
-                <a class="nav__link btn nav__login">Login</a>
+                @if(User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-action="UserProfile" asp-controller="UserProfile" 
+                    asp-route-userId="@(claimHelper.GetClaimValue(ClaimTypes.Sid))">
+                        <img class="profile-img" src="~/img/image_placeholder.png">
+                    </a>
+                }
+                else
+                {
+                    <a class="nav__link btn nav__login">Login</a>
+                }
             </li>
         </ul>
     </nav>
     <div id="body">
         @RenderBody()
+
+        <div class="modal @GetClassByModelState(Model)">
+            <button class="modal__close-btn">X</button>
+            <h4 class="modal__h4">Enter into your <span class="text-highlight">animal hotel</span> account</h4>
+            <form class="modal__form" asp-action="Login" asp-controller="LoginAndRegister" method="post">
+                <input type="hidden" asp-for="ToView"/>
+
+                <label id="login-lbl" class="form__label" asp-for="Login">Login</label>
+                <input id="login-input" class="form__input" asp-for="Login" type="text" placeholder="Email or phone number" value="@Model.Login">
+                <span id="login-validator" asp-validation-for="Login"></span>
+
+                <label id="password-input" class="form__label" asp-for="Password">Password</label>
+                <input id="password-input" class="form__input" asp-for="Password" type="password">
+                <span id="password-validator" asp-validation-for="Password"></span>
+
+                <button class="btn btn-submit btn-login" type="submit">Enter into account</button>
+            </form>
+            <a id="modal__register-link" asp-action="Register" asp-controller="LoginAndRegister">Don't have an account? Create new</a>
+        </div>
+        <div class="overlay @GetClassByModelState(Model)"></div>
     </div>
     <footer id="footer">
         @if(IsSectionDefined("Footer"))
@@ -51,8 +88,16 @@
         {
             <div class="footer__main">            
                 <div class="footer__acc-sec">
-                    <a asp-action="Register" asp-controller="LoginAndRegister" 
-                    class="btn footer__create">Create you free account today!</a>
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <h3 class="welcome__header">Welcome, @(claimHelper.GetClaimValue(ClaimTypes.Name))</h3>
+                    }
+                    else
+                    {
+                        <a asp-action="Register" asp-controller="LoginAndRegister"
+                           class="btn footer__create">Create you free account today!</a>
+                    }
+
                 </div>
                     <ul class="footer__links">
                         <li class="footer__item">

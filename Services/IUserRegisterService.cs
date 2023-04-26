@@ -1,4 +1,4 @@
-﻿using Animal_Hotel.Models.ViewModels;
+﻿using Animal_Hotel.Models.ViewModels.RegisterViewModels;
 
 namespace Animal_Hotel.Services
 {

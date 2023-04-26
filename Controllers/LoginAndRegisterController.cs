@@ -1,7 +1,9 @@
 ﻿using Animal_Hotel.Models.DatabaseModels;
 using Animal_Hotel.Models.ViewModels;
+using Animal_Hotel.Models.ViewModels.RegisterViewModels;
 using Animal_Hotel.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.Diagnostics;
@@ -19,14 +21,18 @@ namespace Animal_Hotel.Controllers
         private readonly IUserLoginInfoService _userLoginInfoRepository;
         private readonly IUserRegisterService _userRegisterService;
         private readonly IIFileProvider _fileProvider;
+        private readonly IReviewService _reviewService;
+        private readonly IRoomService _roomService;
 
         public LoginAndRegisterController(IUserLoginInfoService userLoginsRepository, IUserRegisterService userRegisterService,
-            IConfiguration configuration, IIFileProvider fileProvider)
+            IConfiguration configuration, IIFileProvider fileProvider, IReviewService reviewService, IRoomService roomService)
         {
             _configuration = configuration;
             _userLoginInfoRepository = userLoginsRepository;
             _userRegisterService = userRegisterService;
             _fileProvider = fileProvider;
+            _reviewService = reviewService;
+            _roomService = roomService;
         }
 
         [HttpGet("Register")]
@@ -71,12 +77,14 @@ namespace Animal_Hotel.Controllers
         }
 
         [HttpPost("ConfirmLogin")]
-        public async Task<IActionResult> Login([FromForm] HomePageViewModel model)
+        public async Task<IActionResult> Login([FromForm] HomePageViewModel model, int? pageIndex, int? pageSize)
         {
             model.IsTriedToLogin = true;
+            await RecoverModel(model, pageIndex, pageSize);
+
             if (!ModelState.IsValid)
             {
-                return View("Index", model);
+                return View(model.ToView, model);
             }
 
             var userLogin = await _userLoginInfoRepository.GetLoginWithRoleAndPersonalInfo(model.Login);
@@ -91,20 +99,32 @@ namespace Animal_Hotel.Controllers
             if (userLogin == null)
             {
                 ModelState.AddModelError("Login", "There isn't any user with such email.");
-                return View("Index", model);
+                return View(model.ToView, model);
             }
             string hashedPassword = Sha256_Hash(model.Password);
 
             if (string.Compare(hashedPassword, new StringBuilder().GetString(userLogin.Password), true) != 0)
             {
                 ModelState.AddModelError("Password", "Wrong password, please try again");
-                return View("Index", model);
+                return View(model.ToView, model);
             }
             string token = CreateToken(userLogin);
 
             HttpContext.Session.SetString("access_token", token);
 
-            return RedirectToAction("Index", "AnimalHotel");
+            return RedirectToAction(model.ToView, "AnimalHotel");
+        }
+
+        private async Task RecoverModel(HomePageViewModel model, int? pageIndex, int? pageSize)
+        {
+            //recover reviews
+            model.Reviews = await _reviewService.GetLastReviews(5);
+
+            //recover rooms
+            int index = pageIndex ?? 1, size = pageSize ?? 5;
+            var rooms = await _roomService.GetRoomsByPageIndex(index, size);
+            int count = await _roomService.GetRoomsCountAsync();
+            model.Rooms = new(rooms, count, index, size);
         }
 
         private static string Sha256_Hash(string value)
@@ -121,15 +141,16 @@ namespace Animal_Hotel.Controllers
         {
             string? firstName = user.Client?.FirstName ?? user.Employee?.FirstName;
             string? lastName = user.Client?.LastName ?? user.Employee?.LastName;
+            string? photoPath = user.Client?.PhotoPath ?? user.Employee?.PhotoPath;
 
-            List<Claim> claims = new() 
-            { 
-                new Claim("Id", Convert.ToString(user.Id)),
+            List<Claim> claims = new()
+            {
+                new Claim(ClaimTypes.Sid, Convert.ToString(user.Id)),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.UserType.Name),
                 new Claim(ClaimTypes.Name, $"{firstName} {lastName}"),
                 new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
-                new Claim("ProfileImagePath", "")
+                new Claim("ProfileImagePath", photoPath ?? "UnsetClient.png")
             };
             var token = new JwtSecurityToken
                 (

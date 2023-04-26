@@ -1,0 +1,60 @@
+﻿@model HomePageViewModel
+
+@section ScriptsAndStylesheets
+{
+    <script type="module" defer src="/js/home_page.js"></script>
+    <link rel="stylesheet" href="/css/rooms.css">
+}
+
+<body>
+    <div class="authorization-required">* You must be authorized to view enclosures</div>
+    <main>
+        <div class="rooms__wrapper">
+            @foreach (Room room in Model.Rooms!)
+            {
+                <section class="room__container">
+                    <img class="room__img" src="~/img/image_placeholder.png">  @*room.PhotoPath*@
+                    <div class="room__info-wrapper">
+                        <h1 class="room__title">Room @room.Id</h1>
+                        <span class="room__type">@(room.RoomType.Type)</span>
+                        <h3 class="room__enclosures-amount">Number of Enclosures: @(room.Enclosures.Count)</h3>
+                        <div class="room__pricing-info">
+                            <span class="pricing">
+                                Average Enclosure Price:
+                                @(room.Enclosures.Count == 0 ? 0 : Math.Ceiling(room.Enclosures.Average(e => e.PricePerDay))) ₴
+                                <span class="small__text-span">
+                                    per day
+                                </span>
+                            </span>
+                            <span class="pricing">
+                                Max Enclosure Price: 
+                                @(room.Enclosures.Count == 0 ? 0 : Math.Ceiling(room.Enclosures.Max(e => e.PricePerDay))) ₴
+                                <span class="small__text-span">
+                                    per day
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="view__btn-wrapper">
+                        <a class="enclosures-btn btn @(room.Enclosures.Count == 0 ? "disabled" : "")" 
+                            asp-action="Room" asp-controller="AnimalHotel" asp-route-roomId="@(room.Id)">View Enclosures</a>
+                    </div>
+                </section>
+            }
+        </div>
+        <aside>
+            <a asp-action="">
+                <img class="adv__img" src ="~/img/image_placeholder.png" />
+            </a>
+        </aside>
+    </main>
+    <div class="page__btns-wrapper">
+        <a asp-action="Rooms" asp-controller="AnimalHotel" 
+            asp-route-pageIndex="@(Model.Rooms.PageIndex - 1)" 
+            class="page__btn btn @(!Model.Rooms.HasPreviousPage ? "disabled" : "")">Previous</a>
+        <span class="page__index">@Model.Rooms.PageIndex</span>
+        <a asp-action="Rooms" asp-controller="AnimalHotel" 
+            asp-route-pageIndex="@(Model.Rooms.PageIndex + 1)" 
+            class="page__btn btn @(!Model.Rooms.HasNextPage ? "disabled" : "")">Next</a>
+    </div>
+</body>

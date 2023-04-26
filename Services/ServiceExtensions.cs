@@ -35,13 +35,19 @@ namespace Animal_Hotel.Services
             });
             services.AddHttpContextAccessor();
 
+            services.AddMemoryCache();
+
             services.AddSingleton<IIFileProvider, BaseFileProvider>();
+
+            services.AddScoped<ClaimHelper>();
+
             //Database services
             services.AddDbContext<AnimalHotelDbContext>();
             services.AddSingleton<IDbConnectionProvider, MsSqlConnectionProvider>();
             services.AddScoped<IUserLoginInfoService, UserLoginInfoService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IUserRegisterService, UserRegisterService>();
+            services.AddScoped<IRoomService, RoomService>();
         }
     }
 }
