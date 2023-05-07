@@ -15,5 +15,16 @@ namespace Animal_Hotel.Services
         {
             return _claims.First(c => string.Compare(c.Type, claimType, StringComparison.CurrentCulture) == 0).Value;
         }
+
+        public bool HasClaimWithValue(string claimValue, string claimType)
+        {
+            return _claims.Any(c => string.Compare(c.Value, claimValue, StringComparison.CurrentCulture) == 0 &&
+                string.Compare(c.Type, claimType, StringComparison.CurrentCulture) == 0);
+        }
+
+        public bool HasClaimWithValue(string claimValue)
+        {
+            return _claims.Any(c => string.Compare(c.Value, claimValue, StringComparison.CurrentCulture) == 0);
+        }
     }
 }

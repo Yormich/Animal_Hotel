@@ -23,7 +23,7 @@ if (!app.Environment.IsDevelopment())
 
 app.Map("/", (HttpContext context) =>
 {
-    context.Response.Redirect("AnimalHotel/Rooms");
+    context.Response.Redirect("/AnimalHotel/Rooms");
 });
 
 app.MapControllerRoute(

@@ -2,8 +2,11 @@
 {
     public interface IIFileProvider
     {
-
+        public List<string> DefaultFileNames { get; }
         public Task UploadFileToServer(IFormFile file, string uniqueFileName);
-        public bool IsFileExtensiionSupported(string fileName);
+
+        public Task RemoveFileFromServer(string fileName);
+
+        public bool IsFileExtensionSupported(string fileName);
     }
 }

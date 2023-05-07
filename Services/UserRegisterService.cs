@@ -82,7 +82,7 @@ namespace Animal_Hotel.Services
                 return true;
 
             }
-            catch (DbUpdateException)
+            catch (SqlException)
             {
                 return false;
             }

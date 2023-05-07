@@ -11,15 +11,34 @@ namespace Animal_Hotel.Services
             _config = config;
         }
 
-        public bool IsFileExtensiionSupported(string fileName)
+        public List<string> DefaultFileNames => new List<string>()
+        {
+            "UnsetClient.png",
+            "UnsetEmployee.png",
+            "UnsetAnimal.png"
+        };
+
+        public bool IsFileExtensionSupported(string fileName)
         {
             return _config["ImageExtensions"]!.Contains(Path.GetExtension(fileName));
         }
 
+        public Task RemoveFileFromServer(string fileName)
+        {
+            string name = Path.GetFileName(fileName);
+            string path = @$"{Directory.GetCurrentDirectory()}\wwwroot\img\user_images\{name}";
+            return Task.Run(() => 
+            {
+                if (!DefaultFileNames.Contains(name) && File.Exists(path))
+                {
+                    File.Delete(path);
+                }   
+            });
+        }
+
         public async Task UploadFileToServer(IFormFile file, string uniqueFileName)
         {
-            string uniquePath = @$"{Directory.GetCurrentDirectory()}\wwwroot\img\user_images\{uniqueFileName}";
-            Console.WriteLine(Directory.GetCurrentDirectory());
+            string uniquePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\img\user_images\", uniqueFileName);
             using (var fs = new FileStream(uniquePath, FileMode.Create, FileAccess.Write))
             {
                 await file.CopyToAsync(fs);

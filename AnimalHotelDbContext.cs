@@ -4,6 +4,7 @@ using Animal_Hotel.Services;
 using Animal_Hotel.Models.DatabaseModels;
 using Animal_Hotel.Models.ModelConfigurations;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
 
 namespace Animal_Hotel
 {
@@ -57,6 +58,8 @@ namespace Animal_Hotel
 
             var context = _contextAccessor.HttpContext;
             optionsBuilder.UseSqlServer(_connectionProvider.GetConnection(context));
+            optionsBuilder.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
+                .EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

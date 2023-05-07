@@ -184,6 +184,8 @@ body {
 }
 
 .welcome__header {
+  margin-top: 2%;
+  margin-bottom: 1%;
   font-size: 1.3rem;
 }
 
@@ -243,8 +245,13 @@ body {
 }
 
 .hidden {
+  pointer-events: none;
   visibility: hidden;
   opacity: 0;
+}
+
+.hidden:hover {
+  background-color: transparent;
 }
 
 .overlay {

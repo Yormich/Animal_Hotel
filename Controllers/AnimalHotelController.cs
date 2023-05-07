@@ -12,18 +12,19 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Animal_Hotel.Services;
+#pragma warning disable IDE0090
+
+
 
 namespace Animal_Hotel.Controllers
 {
     public class AnimalHotelController : Controller
     {
-        private readonly ILogger<AnimalHotelController> _logger;
         private readonly IReviewService _reviewService;
         private readonly IRoomService _roomService;
 
-        public AnimalHotelController(IReviewService reviewService, IRoomService roomService, ILogger<AnimalHotelController> logger)
+        public AnimalHotelController(IReviewService reviewService, IRoomService roomService)
         {
-            _logger = logger;
             _reviewService = reviewService;
             _roomService = roomService;
         }
@@ -51,6 +52,7 @@ namespace Animal_Hotel.Controllers
             return View(model);
         }
 
+        [Authorize]
         public async Task<IActionResult> Room(int roomId)
         {
             if (!User.Identity!.IsAuthenticated)

@@ -1,0 +1,68 @@
+.form__input-txt {
+  font-weight: 300;
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 2px solid black;
+  transition: all 0.5s;
+}
+
+.form__input-txt:focus {
+  border: none;
+  outline: none;
+  border-bottom: 3px solid;
+  border-image-slice: 1;
+  border-image-source: var(--gradient-primary);
+}
+
+.form__hidden {
+  display: none;
+}
+.form__input-date {
+  background-color: white;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  padding: calc(var(--index) * 0.5) calc(var(--index));
+  border-radius: calc(var(--index));
+}
+
+.form__input-select {
+  font-size: 1.2rem;
+  text-align: center;
+  padding: (calc(var(--index)));
+  background-color: white;
+  border-radius: calc(var(--index));
+}
+
+.form__input-file {
+  display: none;
+}
+
+.for_input-file {
+  display: grid;
+  place-items: center;
+  background-color: white;
+  cursor: pointer;
+  border: 1px solid gray;
+  text-align: center;
+  color: rgba(71, 70, 70, 0.77);
+  font-size: 1rem;
+  transition: background-color 0.5s, color 0.5s;
+}
+
+.for_input-file:hover {
+  background-color: rgba(142, 139, 139, 0.877);
+  color: black;
+}
+
+.small__text-blue {
+  color: blue;
+  font-size: 1.2rem;
+}
+
+.bg_main-light {
+  background-color: white;
+}
+
+.bd_main_var-light {
+  background-color: var(--color-light);
+}

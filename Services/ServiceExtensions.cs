@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -33,9 +34,18 @@ namespace Animal_Hotel.Services
             {
                 options.IdleTimeout = TimeSpan.FromHours(2);
             });
+
             services.AddHttpContextAccessor();
 
             services.AddMemoryCache();
+
+            //TODO: uncomment code when app is ready to be developed
+            /*services.AddResponseCompression((options) =>
+            {
+                options.EnableForHttps = true;
+
+              //options.Providers.Add(new GzipCompressionProvider(new GzipCompressionProviderOptions()));
+            });*/
 
             services.AddSingleton<IIFileProvider, BaseFileProvider>();
 
@@ -44,7 +54,7 @@ namespace Animal_Hotel.Services
             //Database services
             services.AddDbContext<AnimalHotelDbContext>();
             services.AddSingleton<IDbConnectionProvider, MsSqlConnectionProvider>();
-            services.AddScoped<IUserLoginInfoService, UserLoginInfoService>();
+            services.AddScoped<IUserLoginInfoService, UserService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IUserRegisterService, UserRegisterService>();
             services.AddScoped<IRoomService, RoomService>();

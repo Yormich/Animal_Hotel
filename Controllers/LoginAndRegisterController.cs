@@ -59,7 +59,7 @@ namespace Animal_Hotel.Controllers
             if(files.Any())
             {
                 var file = files[0];
-                if (_fileProvider.IsFileExtensiionSupported(file.FileName))
+                if (_fileProvider.IsFileExtensionSupported(file.FileName))
                 {
                     model.PhotoPath = file.FileName;
                     await _fileProvider.UploadFileToServer(file, $"{model.Login}_{file.FileName}");
@@ -99,15 +99,19 @@ namespace Animal_Hotel.Controllers
             if (userLogin == null)
             {
                 ModelState.AddModelError("Login", "There isn't any user with such email.");
-                return View(model.ToView, model);
             }
-            string hashedPassword = Sha256_Hash(model.Password);
+            string hashedPassword = UtilFuncs.Sha256_Hash(model.Password);
 
             if (string.Compare(hashedPassword, new StringBuilder().GetString(userLogin.Password), true) != 0)
             {
                 ModelState.AddModelError("Password", "Wrong password, please try again");
+            }
+
+            if (!ModelState.IsValid)
+            {
                 return View(model.ToView, model);
             }
+
             string token = CreateToken(userLogin);
 
             HttpContext.Session.SetString("access_token", token);
@@ -125,16 +129,6 @@ namespace Animal_Hotel.Controllers
             var rooms = await _roomService.GetRoomsByPageIndex(index, size);
             int count = await _roomService.GetRoomsCountAsync();
             model.Rooms = new(rooms, count, index, size);
-        }
-
-        private static string Sha256_Hash(string value)
-        {
-            var sb = new StringBuilder();
-            using (SHA256 hash = SHA256.Create())
-            {
-                Byte[] result = hash.ComputeHash(Encoding.UTF8.GetBytes(value));
-                return sb.GetString(result);
-            }
         }
 
         private string CreateToken(UserLoginInfo user)

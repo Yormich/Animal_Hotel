@@ -4,22 +4,9 @@
     Layout = "_NoLoginLayout";
 }
 
-@functions 
-{
-    string DateToHtmlFormatter(DateTime date)
-    {
-        date = date == default(DateTime) ? DateTime.Now : date;
-        string year = date.Year.ToString();
-        year.PadLeft(4, '0');
-        string month = date.Month.ToString().PadLeft(2, '0');
-        string day = date.Day.ToString().PadLeft(2, '0');
-        string htmlDate = $"{year}-{month}-{day}";
-        return htmlDate;
-    }
-}
-
 @section ScriptsAndStylesheets
 {
+    <link rel="stylesheet" href="/css/baseforms.css"/>
     <link rel="stylesheet" href="/css/register.css"/>
     <script defer type="module" src="/js/register.js"></script>
 }
@@ -29,55 +16,108 @@
         <div class="register-form-wrapper">
             <form class="register-form" asp-action="ConfirmClientRegistration" asp-controller="LoginAndRegister" method="post" enctype="multipart/form-data">
                 <div class="form-inputs-container">
-                    <label id="login-lbl" class="register__form-lbl" asp-for="Login">Email*</label>
-                    <input id="login-input" class="form__input-txt" asp-for="Login" type="text" value="@Model.Login"/>
-                    <span id="login-validator" class="register__validation-span" asp-validation-for="Login"></span>
+                    <div class="form__column lu1">
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="Login">Email*</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="Login" type="text" value="@Model.Login" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="Login"></span>
+                        </div>
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="Password">Password*</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="Password" type="password" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="Password"></span>
+                        </div>
+                    </div>
+                    <div class="form__column ru1">
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="PhoneNumber">Phone Number*</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="PhoneNumber" type="tel" value="@Model.PhoneNumber" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="PhoneNumber"></span>
+                        </div>
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="RepeatedPassword">Password Repeat*</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="RepeatedPassword" type="password" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="RepeatedPassword"></span>
+                        </div>
+                    </div>
 
-                    <label id="phone-lbl" class="register__form-lbl" asp-for="PhoneNumber">Phone Number*</label>
-                    <input id="phone-input" class="form__input-txt" asp-for="PhoneNumber" type="tel" value="@Model.PhoneNumber"/>
-                    <span id="phone-validator" class="register__validation-span" asp-validation-for="PhoneNumber"></span>
+                   <div class="form__input-file_placeholder">
+                        <label class="register__form-lbl form__input-file-lbl" asp-for="PhotoPath">Your Photo</label>
+                        <label for="photo-input" class="for_input-file form__input-file-input">
+                            Upload your photo<br />
+                            by clicking on that input<br />
+                            <span class="small__text-blue">+</span>
+                        </label>
+                        <input id="photo-input" class="form__input-file" asp-for="PhotoPath" type="file" accept="image/png,image/jpeg" />
+                        <span class="form__input-file-validator" asp-validation-for="PhotoPath"></span>
+                    </div>
 
-                    <label id="password-lbl" class="register__form-lbl" asp-for="Password">Password*</label>
-                    <input id="password-input" class="form__input-txt" asp-for="Password" type="password" />
-                    <span id="password-validator" class="register__validation-span" asp-validation-for="Password"></span>
+                    <div class="form__column ld1">
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="FirstName">First Name*</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="FirstName" type="text" value="@Model.FirstName" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="FirstName"></span>
+                        </div>
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="BirthDate">Birth Date*</label>
+                            <input class="form__input-date form__input_position" asp-for="BirthDate" type="date"
+                                   value="@(UtilFuncs.DateToHtmlFormatter(Model.BirthDate))" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="BirthDate"></span>
+                        </div>
+                    </div>
 
-                    <label id="password__repeat-lbl" class="register__form-lbl" asp-for="RepeatedPassword">Password Repeat*</label>
-                    <input id="password__repeat-input" class="form__input-txt" asp-for="RepeatedPassword" type="password" />
-                    <span id="password__repeat-validator" class="register__validation-span" asp-validation-for="RepeatedPassword"></span>
-
-                    <label id="firstname-lbl" class="register__form-lbl" asp-for="FirstName">First Name*</label>
-                    <input id="firstname-input" class="form__input-txt" asp-for="FirstName" type="text" value="@Model.FirstName"/>
-                    <span id="firstname-validator" class="register__validation-span" asp-validation-for="FirstName"></span>
-
-                    <label id="lastname-lbl" class="register__form-lbl" asp-for="LastName">Last Name*</label>
-                    <input id="lastname-input" class="form__input-txt" asp-for="LastName" type="text" value="@Model.LastName"/>
-                    <span id="lastname-validator" class="register__validation-span" asp-validation-for="LastName"></span>
-
-                    <label id="birth__date-lbl" class="register__form-lbl" asp-for="BirthDate">Birth Date*</label>
-                    <input id="birth__date-input" class="form__input-date" asp-for="BirthDate" type="date" 
-                        value="@(DateToHtmlFormatter(Model.BirthDate))"/>
-                    <span id="birth__date-validator" class="register__validation-span" asp-validation-for="BirthDate"></span>
-
-                    <label id="card-lbl" class="register__form-lbl" asp-for="CardNumber">Card Number</label>
-                    <input id="card-input" class="form__input-txt" asp-for="CardNumber" type="text" value="@Model.CardNumber"/>
-                    <span id="card-validator" class="register__validation-span" asp-validation-for="CardNumber"></span>
-
-                    <label id="photo-lbl" class="register__form-lbl" asp-for="PhotoPath">Your Photo</label>
-                    <label for="photo-input" class="for_input-file">
-                        Upload your photo<br/>
-                        by clicking on that input<br />
-                        <span class="small__text-blue">+</span>
-                    </label>
-                    <input id="photo-input" class="form__input-file" asp-for="PhotoPath" type="file" accept="image/png, image/jpeg"/>
-                    <span id="photo-validator" asp-validation-for="PhotoPath"></span>
+                    <div class="form__column rd1">
+                        <div class=form__row>
+                            <label class="register__form-lbl form__lbl_position" asp-for="LastName">Last Name*</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="LastName" type="text" value="@Model.LastName" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="LastName"></span>
+                        </div>
+                        <div class="form__row">
+                            <label class="register__form-lbl form__lbl_position" asp-for="CardNumber">Card Number</label>
+                            <input class="form__input-txt bd_main_var-light form__input_position" asp-for="CardNumber" type="text" value="@Model.CardNumber" />
+                            <span class="register__validation-span form__validator_position" asp-validation-for="CardNumber"></span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="register__message-required">
                     * Indicates required fields
                 </div>
 
-                <button class="btn-register btn" type="submit">Submit</button>
+                <button class="btn-register btn disabled" type="submit">Submit</button>
             </form>
         </div>
     </div>
 </body>
+
+@section Footer
+{
+    <footer id="footer">
+        <div class="footer__main">
+            <ul class="footer__links">
+                <li class="footer__item">
+                    <a class="footer__link">Rooms</a>
+                </li>
+                <li class="footer__item">
+                    <a class="footer__link">Pricing</a>
+                </li>
+                <li class="footer__item">
+                    <a class="footer__link">Privacy Policy</a>
+                </li>
+                <li class="footer__item">
+                    <a class="footer__link">Contact Us</a>
+                </li>
+            </ul>
+            <img class="footer__logo" src="/img/image_placeholder.png" alt="Footer Logo Image">
+
+            <div class="copyright__info">
+                &#169; This is a course project made by
+                <a class="github__link" href="https://github.com/Yormich/Animal_Hotel">
+                    Riabov Dmytro
+                </a>
+                by the Database Organization discipline
+                for the National University of Onu named after I.I Mechnikov
+            </div>
+        </div>
+    </footer>
+}

@@ -1,0 +1,101 @@
+﻿@model ClientViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <script defer type="module" src="~/js/profile.js"></script>
+}
+
+@section Main
+{
+    <section class="personal__data-wrapper">
+        <form asp-action="UpdateClient" asp-controller="UserProfile" method="post" enctype="multipart/form-data">
+            <div class="client-form__inputs-wrapper form__wrapper">
+                <input asp-for="UserId" type="hidden"/>
+                <input asp-for="UserPassword" type="hidden"/>
+                <input asp-for="ClientId" type="hidden"/>
+
+                <div class="form__column lu1">
+                    <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="FirstName">First Name</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" asp-for="FirstName" value="@Model.FirstName" readonly />
+                        <span class="form__validator-position" asp-validation-for="FirstName"></span>
+                        <span class="field__edit-btn">
+                            <img class="edit__info-btn" src="~/img/edit.png" />
+                        </span>
+                    </div>
+                    <div class="client-form__row">
+                        <label class="profile__form-lbl" asp-for="Login">Email</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" asp-for="Login" value="@Model.Login" readonly />
+                        <span class="form__validator-position" asp-validation-for="Login"></span>
+                     @*   <div class="email__change-btn">
+                            <a class="email__change-lnk" asp-action="ChangeEmail" asp-controller="UserProfile">Change Email</a>
+                        </div>*@
+                    </div>
+                    <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="BirthDate">Birth Date</label>
+                        <input class="form__input-position form__input-date form_input" type="date" asp-for="BirthDate" 
+                            value="@(UtilFuncs.DateToHtmlFormatter(Model.BirthDate))" />
+                        <span class="form__validator-position" asp-validation-for="BirthDate"></span>
+                    </div>
+
+                    <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="PhotoPath">Your Photo</label>
+                        <label for="photo-input" class="for_input-file form__input-file-input form_file-position">
+                            @Model.PhotoPath
+                        </label>
+                        <input id="photo-input" class="form__input-file form__input" asp-for="PhotoPath" asp-for="PhotoPath" 
+                            value="@Model.PhotoPath" type="file" accept="image/png,image/jpeg" />
+                        <span class="form__input-file-validator form_file-span" asp-validation-for="PhotoPath"></span>
+                    </div>
+
+                </div>
+                <div class="form__column ru1">
+                    <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="LastName">Last Name</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" asp-for="LastName" value="@Model.LastName" readonly />
+                        <span class="form__validator-position" asp-validation-for="LastName"></span>
+                        <span class="field__edit-btn">
+                            <img class="edit__info-btn" src="~/img/edit.png" />
+                        </span>
+                    </div>
+                    <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="PhoneNumber">Phone Number</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" asp-for="PhoneNumber" value="@Model.PhoneNumber" readonly />
+                        <span class="form__validator-position" asp-validation-for="PhoneNumber"></span>
+                        <span class="field__edit-btn">
+                            <img class="edit__info-btn" src="~/img/edit.png" />
+                        </span>
+                    </div>
+                    <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="CardNumber">Card Number</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" type="password"
+                            asp-for="CardNumber" value="@Model.CardNumber"/>
+                        <span class="form__validator-position" asp-validation-for="CardNumber"></span>
+                        <span class="field__edit-btn">
+                            <img class="see__info-btn" src="~/img/openeye.png" />
+                        </span>
+                    </div>
+                    <div class="change-passwd-btn-cont">
+                        <span class="btn change-passwd-btn">Change Password</span>
+                    </div>
+
+                    <div class="client-form__row form__hidden">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="RepeatedPassword">Old Password</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" type="password" 
+                            asp-for="RepeatedPassword"/>
+                        <span class="form__validator-position" asp-validation-for="RepeatedPassword"></span>
+                    </div>
+
+                    <div class="client-form__row form__hidden">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="NewPassword">New Password</label>
+                        <input class="form__input-txt form_input bg_main-light form__input-position" type="password"
+                            asp-for="NewPassword"/>
+                        <span class="form__validator-position" asp-validation-for="NewPassword"></span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn submit__data-btn hidden form-btn-position" type="submit">Submit Changes</button>
+        </form>
+    </section>
+}

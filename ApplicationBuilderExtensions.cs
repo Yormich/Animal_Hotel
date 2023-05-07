@@ -1,4 +1,6 @@
-﻿namespace Animal_Hotel
+﻿using Microsoft.AspNetCore.ResponseCompression;
+
+namespace Animal_Hotel
 {
     public static class ApplicationBuilderExtensions
     {
@@ -19,6 +21,9 @@
             //middlewares for modules and login
             app.UseAuthentication();
             app.UseAuthorization();
+
+            //TODO: uncomment code when app is ready to be developed
+            //app.UseResponseCompression();
         }
     }
 }
