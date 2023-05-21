@@ -1,4 +1,7 @@
-﻿using System.Security.Claims;
+﻿using Animal_Hotel.Models.DatabaseModels;
+using Animal_Hotel.Models.ViewModels.RoleViewModels;
+using System;
+using System.Security.Claims;
 
 namespace Animal_Hotel.Services
 {
@@ -26,5 +29,26 @@ namespace Animal_Hotel.Services
         {
             return _claims.Any(c => string.Compare(c.Value, claimValue, StringComparison.CurrentCulture) == 0);
         }
+
+        public Task<UserViewModel> FormUserByClaims()
+        {
+            return Task.Run(() => 
+            {
+                string[] fullName = this.GetClaimValue(ClaimTypes.Name).Split(' ',StringSplitOptions.RemoveEmptyEntries);
+                string firstName = fullName[0], lastName = fullName[1];
+
+                return new UserViewModel()
+                {
+                    UserId = Convert.ToInt64(this.GetClaimValue(ClaimTypes.PrimarySid)),
+                    SubUserId = Convert.ToInt64(this.GetClaimValue(ClaimTypes.Sid)),
+                    Login = this.GetClaimValue(ClaimTypes.Email),
+                    PhoneNumber = this.GetClaimValue(ClaimTypes.MobilePhone),
+                    BirthDate = Convert.ToDateTime(this.GetClaimValue(ClaimTypes.DateOfBirth)),
+                    FirstName = firstName,
+                    LastName = lastName,
+                    PhotoPath = this.GetClaimValue("ProfileImagePath"),
+                };
+            });
+        } 
     }
 }

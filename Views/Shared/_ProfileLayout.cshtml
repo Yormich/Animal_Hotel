@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta lang="en-US">
 
-    <link rel="stylesheet" href="/css/variables.css">
-    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="~/css/variables.css">
+    <link rel="stylesheet" href="~/css/site.css">
     <link rel="stylesheet" href="~/css/profile.css"/>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
             {
                 <li class="nav__item">
                     <a asp-action="UserProfile" asp-controller="UserProfile"
-                   asp-route-userId="@(claimHelper.GetClaimValue(ClaimTypes.Sid))">
+                   asp-route-userId="@(claimHelper.GetClaimValue(ClaimTypes.PrimarySid))">
                         <img class="profile-img" src="~/img/image_placeholder.png">
                     </a>
                 </li>
@@ -87,7 +87,7 @@
         <ul class="user__actions-list">
             @foreach(var action in Model.Actions)
             {
-                <li class="user__action-item">
+                <li class="user__action-item @(string.Compare(action.Key, Model.ActiveAction) == 0 ? "active" : string.Empty)">
                     <a class="user__action" 
                         asp-action="@action.Key" asp-controller="@action.Value.Controller">@action.Value.Display</a>
                 </li>

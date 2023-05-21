@@ -51,10 +51,10 @@
     <div class="page__btns-wrapper">
         <a asp-action="Rooms" asp-controller="AnimalHotel" 
             asp-route-pageIndex="@(Model.Rooms.PageIndex - 1)" 
-            class="page__btn btn @(!Model.Rooms.HasPreviousPage ? "disabled" : "")">Previous</a>
+            class="page__btn btn @(!Model.Rooms.HasPreviousPage ? "disabled" : "")">Previous %larr;</a>
         <span class="page__index">@Model.Rooms.PageIndex</span>
         <a asp-action="Rooms" asp-controller="AnimalHotel" 
             asp-route-pageIndex="@(Model.Rooms.PageIndex + 1)" 
-            class="page__btn btn @(!Model.Rooms.HasNextPage ? "disabled" : "")">Next</a>
+            class="page__btn btn @(!Model.Rooms.HasNextPage ? "disabled" : "")">Next &rarr;</a>
     </div>
 </body>

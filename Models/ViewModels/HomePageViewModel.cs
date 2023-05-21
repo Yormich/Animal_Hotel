@@ -14,7 +14,7 @@ namespace Animal_Hotel.Models.ViewModels
         public string Password { get; set; } = string.Empty;
         public string ToView { get; set; } = string.Empty;
 
-        public bool IsTriedToLogin { get; set; } = false;
+        public bool IsInteractedWithModal { get; set; } = false;
 
         public List<Review> Reviews { get; set; } = new();
 

@@ -1,0 +1,143 @@
+﻿@model EmployeeBaseViewModel
+@inject ClaimHelper claimHelper
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="/css/baseforms.css"/>
+    <link rel="stylesheet" href="/css/requests.css"/>
+    <script defer src="/js/requests.js" type="module"></script>
+}
+
+@{
+    string statusAbleToDelete = "Sent";
+}
+
+@functions{
+    string CutRequestTextIfNeeded(string text, int maxLength = 100)
+    {
+        if(text.Length <= maxLength)
+        {
+            return text;
+        }
+
+        string cutter = "...";
+        return $"{text[0..(maxLength - cutter.Length)]}{cutter}";
+    }
+}
+
+@section Main 
+{
+    <div class="requests_wrapper">
+        <div class="requests_header">
+            <h1 class="text-highlight">Your Requests</h1>
+            <a asp-action="AddRequestView" asp-controller="EmployeeCommon" asp-route-pageIndex="@Model.Requests!.PageIndex" class="new_request-btn btn">
+                Write new Request
+            </a>
+        </div>
+        <span class="requests_warning">Requests can be deleted only with '<span class="request__default-status">@statusAbleToDelete</span>' status</span>
+        <div class="requests_container">
+            @if (Model.Requests!.Any())
+            {
+                @foreach (var request in Model.Requests!)
+                {
+                    <figure class="request_container">
+                        <div class="request_main_info">
+                            <div class="request_name_status">
+                                <span class="request__name request_prop_header">
+                                    Request @request.Id
+                                </span>
+                                <span>
+                                    <span class="request_prop_header">Status:</span>
+                                    <span class="request_status request_@(string.Join('_',request!.Status!.Status
+                                                        .ToLower()
+                                                        .Split(' ',StringSplitOptions.RemoveEmptyEntries)))">
+                                        @request.Status.Status
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="request_date">
+                                <span class="request_prop_header">Writing date:</span>
+                                @request.WritingDate
+                            </div>
+                        </div>
+                        <div class="request_comment_actions">
+                            <span class="request_prop_header">Request text:</span>
+
+                            @CutRequestTextIfNeeded(request.Text)
+
+                            <div class="request_actions">
+                                <a class="action__show action_btn" asp-action="GetEmployeeRequests"
+                       asp-controller="EmployeeCommon" asp-route-activeRequestId="@request.Id"
+                       asp-route-pageIndex="@Model.Requests.PageIndex">
+                                    Full Request <img class="action_icon" src="~/img/openeye.png">
+                                </a>
+                                <a class="request__edit-btn action__edit action_btn" asp-action="EditRequestView"
+                                    asp-controller="EmployeeCommon" asp-route-requestId="@request.Id" asp-route-pageIndex="@Model.Requests.PageIndex">
+                                    Edit <img class="action_icon" src="~/img/edit-pencil.png">
+                                </a>
+                                <a asp-action="DeleteEmployeeRequest" asp-controller="EmployeeCommon" asp-route-requestId="@(request.Id)"
+                       asp-route-status="@(request.Status.Status)"
+                                   class="action__delete action_btn
+                                @(string.Compare(request.Status.Status, statusAbleToDelete,
+                                    StringComparison.OrdinalIgnoreCase) == 0 ? string.Empty : "disabled")">
+                                    Delete <img class="action_icon" src="~/img/trash-bin.png">
+                                </a>
+                            </div>
+                        </div>
+                    </figure>
+                }
+            }
+            else
+            {
+                <h3 class="no_requests_text">
+                    You don't have any requests. Feel free to add one!'
+                </h3>
+            }
+        </div>
+    </div>
+    <div class="modal @(Model.IsInteractedWithModal ? string.Empty : "hidden")">
+        <button class="modal__close-btn">X</button>
+        <span class="request_modal-header text-highlight">Your 
+            <span class="new__request-span hidden">new</span> Request
+            <span class="request__id-span hidden">@Model.ActiveRequest?.Id</span>
+        </span>
+
+        <form class="rmodal__form" method="post">
+            <div class="form_els-wrapper">
+                <div class="rform__column l1">
+                    <div class="rform__row">
+                        <label for="writer_name" class="profile__form-lbl lbl_position">Writer</label>
+                        <input id="writer_name" class="form__input-txt" type="text" value="@claimHelper.GetClaimValue(ClaimTypes.Name)" readonly>
+                    </div>
+                    <div class="rform__row">
+                        <label for="writing_date" class="profile__form-lbl lbl_position">Writing Date</label>
+                        <input id="writing_date" class="form__input-date" type="date" value="@UtilFuncs.DateToHtmlFormatter(DateTime.Now)">
+                    </div>
+                </div>
+                <div class="rform__column r1">
+                    <div class="rform__row">
+                        <label for="status" class="profile__form-lbl lbl_position">Status</label>
+                        <input id="status" class="form__input-txt" type="text" value="@Model.ActiveRequest?.Status?.Status" readonly>
+                    </div>
+                </div>
+                <div class="form__row-text c_span2">
+                    <label class="profile__form-lbl">Request Text</label>
+                    <textarea class="form__input-textarea txtbox-position" readonly>@Model.ActiveRequest?.Text</textarea>
+                </div>
+                @*<button type="submit" class="btn__submit btn hidden">Submit</button>*@
+            </div>
+        </form>
+    </div>
+    <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+    <div class="page__btns-wrapper">
+        <a asp-action="GetEmployeeRequests" asp-controller="EmployeeCommon" asp-route-pageIndex="@(Model.Requests!.PageIndex - 1)"
+            class="page__btn btn @(Model.Requests!.HasPreviousPage ? "" : "disabled")">
+            &larr; Previous
+        </a>
+        <h3 class="page_index-header"> @Model.Requests.PageIndex </h3>
+        <a asp-action="GetEmployeeRequests" asp-controller="EmployeeCommon" asp-route-pageIndex="@(Model.Requests!.PageIndex + 1)"
+           class="page__btn btn @(Model.Requests!.HasNextPage ? "" : "disabled")">
+           Next &rarr;
+        </a>
+    </div>
+}

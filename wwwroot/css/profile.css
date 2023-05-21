@@ -90,6 +90,9 @@ main {
 .user__action-item.active {
   background-color: white;
   border-radius: calc(var(--index) * 1);
+  box-shadow: 1px 1px 4px #50504f8d;
+  font-weight: 600;
+  pointer-events: none;
 }
 
 .user__action:link,

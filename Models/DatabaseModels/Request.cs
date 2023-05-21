@@ -11,8 +11,9 @@ namespace Animal_Hotel.Models.DatabaseModels
         public long Id { get; set; }
 
         [Required]
+        [Column("request_text")]
         [StringLength(maximumLength:1000, ErrorMessage = "Request message length should be less than 1000 characters")]
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
 
         [Required]
         [Column("writing_date")]
@@ -24,20 +25,15 @@ namespace Animal_Hotel.Models.DatabaseModels
         [ForeignKey("Status")]
         public short StatusId { get; set; }
 
-        public RequestStatus Status { get; set; } = null!;
+        public RequestStatus? Status { get; set; }
 
         [Required]
         [Column("employee_id")]
         [ForeignKey("Writer")]
         public long EmployeeId { get; set; }
 
-        public Employee Writer { get; set; } = null!;
+        public Employee? Writer { get; set; }
 
-        public Request(string text, short statusId, long employeeId)
-        {
-            this.Text = text;
-            this.StatusId = statusId;
-            this.EmployeeId = employeeId;
-        }
+        public Request() { }
     }
 }

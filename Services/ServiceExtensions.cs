@@ -58,6 +58,9 @@ namespace Animal_Hotel.Services
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IUserRegisterService, UserRegisterService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IUserTypeService, UserTypeService>();
+            services.AddTransient<IRequestService, RequestService>();
+            services.AddTransient<IAnimalService, AnimalService>();
         }
     }
 }

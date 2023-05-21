@@ -136,6 +136,8 @@ namespace Animal_Hotel
         {
             etBuilder.HasMany(et => et.Enclosures)
                 .WithOne(ae => ae.EnclosureType);
+
+            etBuilder.Property(et => et.Surcharge).HasPrecision(20, 2);
         }
 
         private static void ConfigureClientReview(EntityTypeBuilder<Review> crBuilder)
@@ -150,6 +152,8 @@ namespace Animal_Hotel
 
         private static void ConfigureAnimalType(EntityTypeBuilder<AnimalType> atBuilder)
         {
+            atBuilder.Property(at => at.BasePrice).HasPrecision(20, 2);
+
             atBuilder.HasMany(at => at.Enclosures)
                 .WithOne(e => e.AnimalType);
 

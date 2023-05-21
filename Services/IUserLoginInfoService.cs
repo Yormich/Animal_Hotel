@@ -11,14 +11,14 @@ namespace Animal_Hotel.Services
 
         public Task<string?> GetUserPhotoPathById(long userId);
 
-        public Task<UserType> GetUserTypeByUserId(long userId);
-        public Task<ClientViewModel?> GetClientDataById(long loginId);
-        public Task<EmployeeViewModel?> GetEmployeeDataById(long loginId);
+        public Task<ClientDataViewModel?> GetClientDataById(long loginId);
+        public Task<EmployeeDataViewModel?> GetEmployeeDataById(long loginId);
 
         public Task UpdatePasswordById(long userId, string password);
 
-        public Task<bool> UpdateClient(ClientViewModel clientViewModel);
+        //TODO: split this methods acroos services
+        public Task<bool> UpdateClient(ClientDataViewModel clientViewModel);
 
-        public Task<bool> UpdateEmployeePersonalData(EmployeeViewModel employeeViewModel);
+        public Task<bool> UpdateEmployeePersonalData(EmployeeDataViewModel employeeViewModel);
     }
 }

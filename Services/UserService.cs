@@ -41,7 +41,7 @@ namespace Animal_Hotel.Services
                 .SingleOrDefaultAsync();
         }
 
-        public Task<ClientViewModel?> GetClientDataById(long loginId)
+        public Task<ClientDataViewModel?> GetClientDataById(long loginId)
         {
             string sql = "SELECT * FROM dbo.user_login_info uli" +
                 " WHERE uli.id = @id";
@@ -51,13 +51,13 @@ namespace Animal_Hotel.Services
             var clientTask = _db.LoginInfos.FromSqlRaw(sql, idParam)
                 .Include(uli => uli.Client)
                 .Include(uli => uli.UserType)
-                .Select(uli => new ClientViewModel()
+                .Select(uli => new ClientDataViewModel()
                 {
                     UserId = uli.Id,
                     Login = uli.Email,
                     UserPassword = new StringBuilder().GetString(uli.Password),
                     PhoneNumber = uli.PhoneNumber,
-                    ClientId = uli.Client!.Id,
+                    SubUserId = uli.Client!.Id,
                     FirstName = uli.Client!.FirstName,
                     LastName = uli.Client.LastName,
                     BirthDate = uli.Client!.BirthDate,
@@ -68,16 +68,6 @@ namespace Animal_Hotel.Services
                 .FirstOrDefaultAsync();
 
             return clientTask;
-        }
-
-        public Task<UserType> GetUserTypeByUserId(long userId)
-        {
-            string sql = "SELECT ut.id, ut.name FROM dbo.user_login_info uli" +
-                " INNER JOIN dbo.user_type ut ON uli.user_type_id = ut.id" +
-                " WHERE uli.id = @userId";
-            SqlParameter idParam = new SqlParameter("userId", userId);
-
-            return _db.UserTypes.FromSqlRaw(sql, idParam).FirstAsync();
         }
 
         public Task<string?> GetUserPhotoPathById(long userId)
@@ -100,7 +90,7 @@ namespace Animal_Hotel.Services
             return loginInfos.Select(uli => isClient ? uli.Client!.PhotoPath : uli.Employee!.PhotoPath).FirstAsync();
         }
 
-        public Task<EmployeeViewModel?> GetEmployeeDataById(long loginId)
+        public Task<EmployeeDataViewModel?> GetEmployeeDataById(long loginId)
         {
             string sql = "SELECT * FROM dbo.user_login_info uli" +
                 " WHERE uli.id = @id";
@@ -110,13 +100,13 @@ namespace Animal_Hotel.Services
             var employeeTask = _db.LoginInfos.FromSqlRaw(sql, idParam)
                 .Include(uli => uli.Employee)
                 .Include(uli => uli.UserType)
-                .Select(uli => new EmployeeViewModel()
+                .Select(uli => new EmployeeDataViewModel()
                 {
                     UserId = uli.Id,
                     Login = uli.Email,
                     UserPassword = new StringBuilder().GetString(uli.Password),
                     PhoneNumber = uli.PhoneNumber,
-                    EmployeeId = uli.Employee!.Id,
+                    SubUserId = uli.Employee!.Id,
                     FirstName = uli.Employee!.FirstName,
                     LastName = uli.Employee!.LastName,
                     BirthDate = uli.Employee!.BirthDate,
@@ -138,7 +128,7 @@ namespace Animal_Hotel.Services
             .AsQueryable());
         }
 
-        public async Task<bool> UpdateClient(ClientViewModel clientViewModel)
+        public async Task<bool> UpdateClient(ClientDataViewModel clientViewModel)
         {
             string sql = "EXEC UpdateClient" +
                 " @UserId = @userId," +
@@ -156,7 +146,7 @@ namespace Animal_Hotel.Services
                 SqlParameter idParam = new("userId", clientViewModel.UserId);
                 SqlParameter loginParam = new("email", clientViewModel.Login);
                 SqlParameter phoneParam = new SqlParameter("phone", clientViewModel.PhoneNumber);
-                SqlParameter clientIdParam = new("clientId", clientViewModel.ClientId);
+                SqlParameter clientIdParam = new("clientId", clientViewModel.SubUserId);
                 SqlParameter firstNameParam = new("firstName", clientViewModel.FirstName);
                 SqlParameter lastNameParam = new("lastName", clientViewModel.LastName);
                 SqlParameter photoPathParam = new("photoPath", string.IsNullOrEmpty(clientViewModel.PhotoPath) ? null : 
@@ -175,7 +165,7 @@ namespace Animal_Hotel.Services
             }
         }
 
-        public async Task<bool> UpdateEmployeePersonalData(EmployeeViewModel employeeViewModel)
+        public async Task<bool> UpdateEmployeePersonalData(EmployeeDataViewModel employeeViewModel)
         {
             string sql = "EXEC UpdateEmployeePersonalData" +
                 " @UserId = @userid," +
@@ -192,7 +182,7 @@ namespace Animal_Hotel.Services
                 SqlParameter idParam = new("userid", employeeViewModel.UserId);
                 SqlParameter loginParam = new("email", employeeViewModel.Login);
                 SqlParameter phoneParam = new SqlParameter("phonenumber", employeeViewModel.PhoneNumber);
-                SqlParameter employeeIdParam = new("employeeid", employeeViewModel.EmployeeId);
+                SqlParameter employeeIdParam = new("employeeid", employeeViewModel.SubUserId);
                 SqlParameter firstNameParam = new("firstname", employeeViewModel.FirstName);
                 SqlParameter lastNameParam = new("lastname", employeeViewModel.LastName);
                 SqlParameter sexParam = new("sex", employeeViewModel.Sex);
@@ -203,7 +193,7 @@ namespace Animal_Hotel.Services
                     lastNameParam, sexParam, photoPathParam, birthDateParam);
                 return true;
             }
-            catch(SqlException e)
+            catch(SqlException)
             {
                 return false;
             }

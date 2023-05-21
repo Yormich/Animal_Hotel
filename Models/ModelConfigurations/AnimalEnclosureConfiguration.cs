@@ -8,6 +8,8 @@ namespace Animal_Hotel.Models.ModelConfigurations
     {
         public void Configure(EntityTypeBuilder<AnimalEnclosure> builder)
         {
+            builder.Property(e => e.PricePerDay).HasPrecision(40, 4);
+
             builder.HasOne(ae => ae.Room)
                 .WithMany(r => r.Enclosures)
                 .HasForeignKey(ae => ae.RoomId)

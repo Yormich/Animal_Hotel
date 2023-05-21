@@ -55,40 +55,46 @@ const init = function (
     }
   });
 
-  changePasswordBtn.addEventListener('click', function () {
-    changePasswordBtn.classList.add('hidden');
+  if (changePasswordBtn) {
+    changePasswordBtn.addEventListener('click', function () {
+      changePasswordBtn.classList.add('hidden');
 
-    enablePasswordInputs();
-    changePasswordBtn.remove();
-  });
+      enablePasswordInputs();
+      changePasswordBtn.remove();
+    });
+  }
 
-  formContainer.addEventListener('click', function (e) {
-    const inputEl = e.target.parentElement.parentElement.querySelector(
-      `.${inputSelector}`
-    );
-    if (e.target.classList.contains(editBtnsSelector) && inputEl) {
-      removeInputReadonly(e.target, inputEl);
-    }
+  if (formContainer) {
+    formContainer.addEventListener('click', function (e) {
+      const inputEl = e.target.parentElement.parentElement.querySelector(
+        `.${inputSelector}`
+      );
+      if (e.target.classList.contains(editBtnsSelector) && inputEl) {
+        removeInputReadonly(e.target, inputEl);
+      }
 
-    if (e.target.classList.contains(seeBtnsSelector) && inputEl) {
-      makeInputValueVisible(e.target, inputEl);
-    }
-  });
+      if (e.target.classList.contains(seeBtnsSelector) && inputEl) {
+        makeInputValueVisible(e.target, inputEl);
+      }
+    });
 
-  fileInput.addEventListener('change', function (e) {
-    fileLbl.textContent = `Uploaded ${e.target.files[0].name}`;
-    submitDataBtn.classList.remove('hidden');
-    e.stopPropagation();
-  });
+    formContainer.addEventListener('input', checkInputValues);
+    formContainer.addEventListener('change', checkInputValues);
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function (e) {
+      fileLbl.textContent = `Uploaded ${e.target.files[0].name}`;
+      submitDataBtn.classList.remove('hidden');
+      e.stopPropagation();
+    });
+  }
 
   //   inputElements.forEach(el =>
   //     el.addEventListener('change', function (e) {
   //       console.log(e.target);
   //     })
   //   );
-
-  formContainer.addEventListener('input', checkInputValues);
-  formContainer.addEventListener('change', checkInputValues);
 };
 
 document.addEventListener('DOMContentLoaded', function () {

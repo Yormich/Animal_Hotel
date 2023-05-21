@@ -1,4 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Animal_Hotel
@@ -22,6 +26,52 @@ namespace Animal_Hotel
             using SHA256 hash = SHA256.Create();
             Byte[] result = hash.ComputeHash(Encoding.UTF8.GetBytes(value));
             return sb.GetString(result);
+        }
+
+        public static Task<Dictionary<string, (string Controller, string Display)>> CreateUserActionsList(string role,
+            IMemoryCache cache)
+        {
+            return Task.Run(() =>
+            {
+                string key = $"{role}Actions";
+                cache.TryGetValue(key, out Dictionary<string, (string, string)>? cachedActions);
+
+                if (cachedActions == null)
+                {
+                    var controller = typeof(Controller);
+
+                    //get controllers that inherit from Controller class
+                    var controllerDescendants = Assembly.GetExecutingAssembly().GetTypes()
+                        .Where(t => controller.IsAssignableFrom(t));
+
+                    //for each descendant
+                    Dictionary<string, (string, string)> actions = new();
+                    foreach (var descendant in controllerDescendants)
+                    {
+                        var methods = descendant
+                            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                            .Where(method =>
+                            {
+                                var authorize = method.GetCustomAttribute<AuthorizeAttribute>();
+                                bool isActionMapped = method.GetCustomAttribute<ActionMapperAttribute>() != null;
+
+                                return authorize != null && isActionMapped
+                                    && (authorize.Roles?.Contains(role, StringComparison.CurrentCulture) ?? false);
+                            });
+                        foreach (var method in methods)
+                        {
+                            var toAction = method.GetCustomAttribute<ActionMapperAttribute>()!;
+                            actions.Add(toAction.ActionName, (toAction.ControllerName, toAction.DisplayName));
+                        }
+                    }
+
+                    cache.Set(key, actions, new MemoryCacheEntryOptions()
+                        .SetAbsoluteExpiration(TimeSpan.FromMinutes(30)));
+                    return actions;
+                }
+                return cachedActions;
+
+            });
         }
     }
 }

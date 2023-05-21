@@ -8,6 +8,8 @@ namespace Animal_Hotel.Models.ModelConfigurations
     {
         public void Configure(EntityTypeBuilder<Employee> builder)
         {
+            builder.Property(e => e.Salary).HasPrecision(30, 3);
+
             builder.HasOne(e => e.LoginInfo)
                 .WithOne(uli => uli.Employee)
                 .HasForeignKey<UserLoginInfo>(uli => uli.EmployeeId);

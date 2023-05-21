@@ -8,6 +8,9 @@ namespace Animal_Hotel.Models.ModelConfigurations
     {
         public void Configure(EntityTypeBuilder<Contract> builder)
         {
+            builder.Property(c => c.ActuallyPaid).HasPrecision(40, 4);
+            builder.Property(c => c.FullPrice).HasPrecision(40, 4);
+
             builder.HasOne(c => c.Enclosure)
                 .WithMany(e => e.Contracts)
                 .HasForeignKey(c => c.EnclosureId)

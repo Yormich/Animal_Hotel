@@ -6,6 +6,18 @@
   transition: all 0.5s;
 }
 
+input {
+  overflow: hidden;
+}
+
+input[readonly] {
+  background-color: rgb(138, 138, 138, 0.5);
+}
+
+.readonly {
+  background-color: rgb(138, 138, 138, 0.5);
+}
+
 .form__input-txt:focus {
   border: none;
   outline: none;
@@ -23,6 +35,16 @@
   font-size: 1rem;
   padding: calc(var(--index) * 0.5) calc(var(--index));
   border-radius: calc(var(--index));
+}
+
+.form__input-textarea {
+  background-color: white;
+  width: 100%;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  padding: calc(var(--index) * 0.5) calc(var(--index));
+  border-radius: calc(var(--index));
+  resize: none;
 }
 
 .form__input-select {

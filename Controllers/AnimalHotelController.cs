@@ -47,7 +47,7 @@ namespace Animal_Hotel.Controllers
             {
                 ToView = "Rooms",
                 Rooms = new PaginatedList<Room>(rooms, await _roomService.GetRoomsCountAsync(), index, pageSize),
-                IsTriedToLogin = isNotAuthorized ?? false
+                IsInteractedWithModal = isNotAuthorized ?? false
             };
             return View(model);
         }

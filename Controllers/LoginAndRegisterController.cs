@@ -79,7 +79,7 @@ namespace Animal_Hotel.Controllers
         [HttpPost("ConfirmLogin")]
         public async Task<IActionResult> Login([FromForm] HomePageViewModel model, int? pageIndex, int? pageSize)
         {
-            model.IsTriedToLogin = true;
+            model.IsInteractedWithModal = true;
             await RecoverModel(model, pageIndex, pageSize);
 
             if (!ModelState.IsValid)
@@ -89,17 +89,19 @@ namespace Animal_Hotel.Controllers
 
             var userLogin = await _userLoginInfoRepository.GetLoginWithRoleAndPersonalInfo(model.Login);
 
-            return HandleLoginResult(model, userLogin);
-        }
-
-        private IActionResult HandleLoginResult(HomePageViewModel model, UserLoginInfo? userLogin)
-        {
-            Response.StatusCode = 401;
-
             if (userLogin == null)
             {
                 ModelState.AddModelError("Login", "There isn't any user with such email.");
+                return View(model.ToView, model);
             }
+
+            return HandleLoginResult(model, userLogin);
+        }
+
+        private IActionResult HandleLoginResult(HomePageViewModel model, UserLoginInfo userLogin)
+        {
+            Response.StatusCode = 401;
+
             string hashedPassword = UtilFuncs.Sha256_Hash(model.Password);
 
             if (string.Compare(hashedPassword, new StringBuilder().GetString(userLogin.Password), true) != 0)
@@ -133,18 +135,23 @@ namespace Animal_Hotel.Controllers
 
         private string CreateToken(UserLoginInfo user)
         {
-            string? firstName = user.Client?.FirstName ?? user.Employee?.FirstName;
-            string? lastName = user.Client?.LastName ?? user.Employee?.LastName;
-            string? photoPath = user.Client?.PhotoPath ?? user.Employee?.PhotoPath;
+            string firstName = user.Client?.FirstName ?? user.Employee!.FirstName;
+            string lastName = user.Client?.LastName ?? user.Employee!.LastName;
+            string photoPath = user.Client?.PhotoPath ?? user.Employee!.PhotoPath;
+            DateTime dateOfBirth = user.Client?.BirthDate ?? user.Employee!.BirthDate;
+            long userSecondId = user.Client?.Id ?? user.Employee!.Id;
 
             List<Claim> claims = new()
             {
-                new Claim(ClaimTypes.Sid, Convert.ToString(user.Id)),
+                new Claim(ClaimTypes.PrimarySid, Convert.ToString(user.Id)),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.UserType.Name),
                 new Claim(ClaimTypes.Name, $"{firstName} {lastName}"),
+                new Claim(ClaimTypes.DateOfBirth, Convert.ToString(dateOfBirth)),
                 new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
-                new Claim("ProfileImagePath", photoPath ?? "UnsetClient.png")
+                new Claim(ClaimTypes.Sid, Convert.ToString(userSecondId)),
+                new Claim("ProfileImagePath", photoPath ?? "UnsetClient.png"),
+
             };
             var token = new JwtSecurityToken
                 (

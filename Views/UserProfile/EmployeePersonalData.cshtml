@@ -1,4 +1,4 @@
-﻿@model EmployeeViewModel
+﻿@model EmployeeDataViewModel
 
 @section ScriptsAndStylesheets
 {
@@ -13,7 +13,8 @@
             <div class="employee-form__inputs-wrapper form__wrapper">
                 <input asp-for="UserId" type="hidden" />
                 <input asp-for="UserPassword" type="hidden" />
-                <input asp-for="EmployeeId" type="hidden" />
+                <input asp-for="SubUserId" type="hidden" />
+                <input asp-for="ActiveAction" type="hidden"/>
 
                 <div class="form__column lu1">
                     <div class="emp-form__row">

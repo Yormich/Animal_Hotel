@@ -9,7 +9,6 @@
         {
             PageIndex = pageIndex;
             TotalPages = (int)Math.Ceiling(rowCount / (double)pageSize);
-
             this.AddRange(items);
         }
 

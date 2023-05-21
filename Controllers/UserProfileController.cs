@@ -22,32 +22,34 @@ namespace Animal_Hotel.Controllers
         private readonly ClaimHelper _claimHelper;
         private readonly IUserLoginInfoService _userLoginService;
         private readonly IIFileProvider _fileProvider;
+        private readonly IUserTypeService _userTypeService;
 
         public UserProfileController(ClaimHelper claimHelper, IUserLoginInfoService userLoginService, IMemoryCache cache,
-            IIFileProvider fileProvider)
+            IIFileProvider fileProvider, IUserTypeService userTypeService)
         {
             _claimHelper = claimHelper;
             _userLoginService = userLoginService;
             _cache = cache; 
             _fileProvider = fileProvider;
+            _userTypeService = userTypeService;
         }
 
         [HttpGet]
         [Authorize]
-        public IActionResult UserProfile(long userId)
+        public IActionResult UserProfile()
         {
             bool isClient = _claimHelper.HasClaimWithValue("Client");
-            var routeData = new { userId };
 
-            return RedirectToAction($"{(isClient ? "Client" : "Employee")}PersonalData", routeData);
+            return RedirectToAction($"{(isClient ? "Client" : "Employee")}PersonalData");
         }
 
         [HttpGet]
         [Authorize(Roles = "Client")]
         [ActionMapper("ClientPersonalData", "UserProfile", "Personal Data")]
-        public async Task<IActionResult> ClientPersonalData(long userId)
+        public async Task<IActionResult> ClientPersonalData()
         {
-            var actionsTask = CreateUserActionsList(_claimHelper.GetClaimValue(ClaimTypes.Role));
+            long userId = Convert.ToInt64(_claimHelper.GetClaimValue(ClaimTypes.PrimarySid));
+            var actionsTask = UtilFuncs.CreateUserActionsList(_claimHelper.GetClaimValue(ClaimTypes.Role), _cache);
             var client = await _userLoginService.GetClientDataById(userId);
 
             if (client == null)
@@ -56,12 +58,14 @@ namespace Animal_Hotel.Controllers
             }
 
             client.Actions = await actionsTask;
+            client.ActiveAction = "ClientPersonalData";
+
             return View(client);
         }
 
         [HttpPost]
         [Authorize(Roles = "Client")]
-        public async Task<IActionResult> UpdateClient(ClientViewModel model)
+        public async Task<IActionResult> UpdateClient(ClientDataViewModel model)
         {
             if ((DateTime.Now.Subtract(model.BirthDate).Days / 365) < 16)
             {
@@ -82,7 +86,7 @@ namespace Animal_Hotel.Controllers
 
         [HttpPost]
         [Authorize(Roles = "AnimalWatcher,Receptionist,HotelManager")]
-        public async Task<IActionResult> UpdateEmployee(EmployeeViewModel model)
+        public async Task<IActionResult> UpdateEmployee(EmployeeDataViewModel model)
         {
             if ((DateTime.Now.Subtract(model.BirthDate).Days / 365) < 18)
             {
@@ -110,12 +114,12 @@ namespace Animal_Hotel.Controllers
 
         private async Task HandleUsersSimilarData(UserViewModel model)
         {
-            var actionsBuilder = this.CreateUserActionsList(_claimHelper.GetClaimValue(ClaimTypes.Role));
+            var actionsBuilder = UtilFuncs.CreateUserActionsList(_claimHelper.GetClaimValue(ClaimTypes.Role), _cache);
             await UpdatePasswordIfChanged(model);
             await UpdateProfileFileIfPassed(model, HttpContext.Request.Form.Files,
                 (await _userLoginService.GetUserPhotoPathById(model.UserId))!);
 
-            var userTypeT = _userLoginService.GetUserTypeByUserId(model.UserId);
+            var userTypeT = _userTypeService.GetUserTypeByUserId(model.UserId);
             model.Actions = await actionsBuilder;
             model.UserType = await userTypeT;
         }
@@ -123,9 +127,10 @@ namespace Animal_Hotel.Controllers
         [HttpGet]
         [Authorize(Roles = "AnimalWatcher,Receptionist,HotelManager")]
         [ActionMapper("EmployeePersonalData", "UserProfile", "Personal Data")]
-        public async Task<IActionResult> EmployeePersonalData(long userId)
+        public async Task<IActionResult> EmployeePersonalData()
         {
-            var actionsTask = CreateUserActionsList(_claimHelper.GetClaimValue(ClaimTypes.Role));
+            long userId = Convert.ToInt64(_claimHelper.GetClaimValue(ClaimTypes.PrimarySid));
+            var actionsTask = UtilFuncs.CreateUserActionsList(_claimHelper.GetClaimValue(ClaimTypes.Role), _cache);
             var employee = await _userLoginService.GetEmployeeDataById(userId);
 
 
@@ -135,6 +140,8 @@ namespace Animal_Hotel.Controllers
             }
 
             employee.Actions = await actionsTask;
+            employee.ActiveAction = "EmployeePersonalData";
+
             return View(employee);
         }
 
@@ -178,51 +185,6 @@ namespace Animal_Hotel.Controllers
                 }
             }
             return Task.CompletedTask;
-        }
-
-        private Task<Dictionary<string, (string Controller, string Display)>> CreateUserActionsList(string role)
-        {
-            return Task.Run(() =>
-            {
-                string key = $"{role}Actions";
-                _cache.TryGetValue(key, out Dictionary<string, (string, string)>? cachedActions);
-
-                if (cachedActions == null)
-                {
-                    var controller = typeof(Controller);
-
-                    //get controllers that inherit from Controller class
-                    var controllerDescendants = Assembly.GetExecutingAssembly().GetTypes()
-                        .Where(t => controller.IsAssignableFrom(t));
-
-                    //for each descendant
-                    Dictionary<string, (string, string)> actions = new();
-                    foreach (var descendant in controllerDescendants)
-                    {
-                        var methods = descendant
-                            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                            .Where(method =>
-                            {
-                                var authorize = method.GetCustomAttribute<AuthorizeAttribute>();
-                                bool isActionMapped = method.GetCustomAttribute<ActionMapperAttribute>() != null;
-
-                                return authorize != null && isActionMapped
-                                    && (authorize.Roles?.Contains(role, StringComparison.CurrentCulture) ?? false);
-                            });
-                        foreach (var method in methods)
-                        {
-                            var toAction = method.GetCustomAttribute<ActionMapperAttribute>()!;
-                            actions.Add(toAction.ActionName, (toAction.ControllerName, toAction.DisplayName));
-                        }
-                    }
-
-                    _cache.Set(key, actions, new MemoryCacheEntryOptions()
-                        .SetAbsoluteExpiration(TimeSpan.FromMinutes(30)));
-                    return actions;
-                }
-                return cachedActions;
-
-            });
         }
     }
 }

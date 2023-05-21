@@ -1,0 +1,34 @@
+﻿@model ClientDataViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/animals.css"/>
+
+    <script type="module" defer src="~/js/modal_uni.js"></script>
+}
+
+@section Main 
+{
+    <div class="animals__header-wrapper">
+        <span class="an_page-title text-highlight">Your Animals</span>
+        <a class="new__animal-btn btn" asp-action="" asp-controller="">
+            Add New Animal
+        </a>
+    </div>
+    @if(Model.Animals!.Count != 0)
+    {
+        <div class="animals__wrapper">
+
+        </div>
+    }
+    else
+    {
+        <div class="no_animals-wrapper">
+            <img class="no_animals-img" src="~/img/SadCat.png" alt="No Animals image">
+            <div class="no_animals-title">
+                You don't have any registered animals yet. Feel free to <span class="text-highlight">add new</span>!
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,54 @@
+﻿@model EmployeeBaseViewModel
+@inject ClaimHelper claimHelper
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="/css/baseforms.css" />
+    <link rel="stylesheet" href="/css/requests.css" />
+}
+
+@section Main
+{
+    <div class="edit__form-wrapper">
+        <span class="skew-highlight request_modal-header">Your Request @Model.ActiveRequest!.Id</span>
+        <form asp-action="UpdateEmployeeRequest" asp-controller="EmployeeCommon" method="post">
+            <input asp-for="Login" type="hidden" />
+            <input asp-for="LastName" type="hidden" />
+            <input asp-for="FirstName" type="hidden" />
+            <input asp-for="PhoneNumber" type="hidden" />
+
+            <input asp-for="ActiveRequest!.Id" type="hidden" />
+            <input asp-for="ActiveRequest!.StatusId" type="hidden" />
+            <input asp-for="ActiveRequest!.EmployeeId" type="hidden" />
+
+
+            <div class="form_els-wrapper">
+                <div class="rform__column l1">
+                    <div class="rform__row">
+                        <label for="writer_name" class="profile__form-lbl lbl_position">Writer</label>
+                        <input id="writer_name" class="form__input-txt" type="text" value="@claimHelper.GetClaimValue(ClaimTypes.Name)" readonly>
+                    </div>
+                    <div class="rform__row">
+                        <label for="writing_date" class="profile__form-lbl lbl_position">Writing Date</label>
+                        <input id="writing_date" class="form__input-date" type="date" value="@UtilFuncs.DateToHtmlFormatter(DateTime.Now)">
+                    </div>
+                </div>
+                <div class="rform__column r1">
+                    <div class="rform__row">
+                        <label for="status" class="profile__form-lbl lbl_position">Status</label>
+                        <input id="status" class="form__input-txt" type="text" value="@Model.ActiveRequest!.Status!.Status" readonly>
+                    </div>
+                </div>
+                <div class="form__row-text c_span2">
+                    <label asp-for="ActiveRequest!.Text" class="profile__form-lbl">Request Text</label>
+                    <textarea class="form__input-textarea txtbox-position"
+                          asp-for="ActiveRequest!.Text">
+                        @Model.ActiveRequest!.Text
+                            </textarea>
+                    <span asp-validation-for="ActiveRequest!.Text"></span>
+                </div>
+            </div>
+            <button class="btn__submit btn" type="submit">Submit</button>
+        </form>
+    </div>
+}

@@ -40,7 +40,7 @@
             {
                 <li class="nav__item">
                     <a asp-action="UserProfile" asp-controller="UserProfile"
-                   asp-route-userId="@(claimHelper.GetClaimValue(ClaimTypes.Sid))">
+                   asp-route-userId="@(claimHelper.GetClaimValue(ClaimTypes.PrimarySid))">
                         <img class="profile-img" src="~/img/image_placeholder.png">
                     </a>
                 </li>

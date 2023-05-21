@@ -1,6 +1,8 @@
 ﻿using Animal_Hotel.Models.DatabaseModels;
+using Animal_Hotel.Services;
+using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
-
+using System.Security.Claims;
 
 namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 {
@@ -8,6 +10,8 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
     {
         [Required]
         public long UserId { get; set; }
+
+        public long SubUserId { get; set; }
 
         [Required(ErrorMessage = "This field is required")]
         [EmailAddress(ErrorMessage = "Enter correct email")]
@@ -47,5 +51,21 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
         public UserType? UserType { get; set; }
 
         public Dictionary<string, (string Controller, string Display)> Actions { get; set; } = new();
+
+        public string ActiveAction { get; set; } = string.Empty;
+
+
+        public static async Task<UserViewModel> CreateUser(ClaimHelper claimHelper, IUserTypeService userTypeService, IMemoryCache cache)
+        {
+            var userActionsTask = UtilFuncs.CreateUserActionsList(claimHelper.GetClaimValue(ClaimTypes.Role), cache);
+            var userTask = claimHelper.FormUserByClaims();
+            var userTypeTask = userTypeService
+                .GetUserTypeByUserId(Convert.ToInt64(claimHelper.GetClaimValue(ClaimTypes.PrimarySid)));
+
+            UserViewModel user = await userTask;
+            user.Actions = await userActionsTask;
+            user.UserType = await userTypeTask;
+            return user;
+        }
     }
 }
