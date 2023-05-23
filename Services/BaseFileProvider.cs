@@ -15,7 +15,10 @@ namespace Animal_Hotel.Services
         {
             "UnsetClient.png",
             "UnsetEmployee.png",
-            "UnsetAnimal.png"
+            "DefaultCat.png",
+            "DefaultDog.png",
+            "DefaultParrot.png",
+            "DefaultRodent.png",
         };
 
         public bool IsFileExtensionSupported(string fileName)

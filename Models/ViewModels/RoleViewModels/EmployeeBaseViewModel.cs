@@ -8,8 +8,6 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 
         public Request? ActiveRequest { get; set; }
 
-        public bool IsInteractedWithModal { get; set; }
-
         public EmployeeBaseViewModel(UserViewModel user)
         {
             this.UserId = user.UserId;

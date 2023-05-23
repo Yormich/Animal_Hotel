@@ -54,6 +54,7 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 
         public string ActiveAction { get; set; } = string.Empty;
 
+        public bool IsInteractedWithModal { get; set; }
 
         public static async Task<UserViewModel> CreateUser(ClaimHelper claimHelper, IUserTypeService userTypeService, IMemoryCache cache)
         {

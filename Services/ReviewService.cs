@@ -17,10 +17,30 @@ namespace Animal_Hotel.Services
             _cache = memoryCache;
         }
 
+        public Task CreateReview(Review review)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteReview(long reviewId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Review?> GetClientReview(long clientId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateReview(Review review)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<List<Review>> GetLastReviews(int number)
         {
             string sql = "SELECT TOP 5 * FROM dbo.client_review cr" +
-                " ORDER BY cr.rating DESC, cr.writing_date DESC";
+                " ORDER BY cr.writing_date DESC, cr.rating DESC";
 
             _cache.TryGetValue($"GetLastReviews({number})", out List<Review>? reviews);
 

@@ -131,12 +131,12 @@
     <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
     <div class="page__btns-wrapper">
         <a asp-action="GetEmployeeRequests" asp-controller="EmployeeCommon" asp-route-pageIndex="@(Model.Requests!.PageIndex - 1)"
-            class="page__btn btn @(Model.Requests!.HasPreviousPage ? "" : "disabled")">
+            class="page__btn btn @(Model.Requests!.HasPreviousPage ? string.Empty : "disabled")">
             &larr; Previous
         </a>
         <h3 class="page_index-header"> @Model.Requests.PageIndex </h3>
         <a asp-action="GetEmployeeRequests" asp-controller="EmployeeCommon" asp-route-pageIndex="@(Model.Requests!.PageIndex + 1)"
-           class="page__btn btn @(Model.Requests!.HasNextPage ? "" : "disabled")">
+           class="page__btn btn @(Model.Requests!.HasNextPage ? string.Empty : "disabled")">
            Next &rarr;
         </a>
     </div>

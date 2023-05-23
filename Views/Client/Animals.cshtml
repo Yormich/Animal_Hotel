@@ -1,4 +1,9 @@
 ﻿@model ClientDataViewModel
+@inject ClaimHelper claimHelper
+
+@{
+    string? deleteError = TempData["DeleteError"] as string;
+}
 
 @section ScriptsAndStylesheets
 {
@@ -10,25 +15,145 @@
 
 @section Main 
 {
-    <div class="animals__header-wrapper">
-        <span class="an_page-title text-highlight">Your Animals</span>
-        <a class="new__animal-btn btn" asp-action="" asp-controller="">
-            Add New Animal
-        </a>
-    </div>
-    @if(Model.Animals!.Count != 0)
-    {
-        <div class="animals__wrapper">
+    <div class="animal__page-wrapper">
+        <div class="animals__header-wrapper">
+            <span class="an_page-title text-highlight">Your Animals</span>
+            <a class="new__animal-btn btn" asp-action="AddAnimalView" asp-controller="Client" asp-route-pageIndex="@Model.Animals!.PageIndex">
+                Add New Animal
+            </a>
+        </div>
+        @if (Model.Animals!.Count != 0)
+        {
+            <div class="animals_cont-align">
+                <div class="animals__wrapper">
+                    @foreach (Animal animal in Model.Animals)
+                    {
+                        <div class="animal__wrapper">
+                            <img class="animal__photo" src="~/img/image_placeholder.png">@*TODO: rewrite image*@
+                            <div class="card__info-container">
+                                <span class="animal__name">@animal.Name</span>
+                                <span class="animal__type">@animal.AnimalType.Name</span>
+                                <div class="acard__row">
+                                    <div class="acard__column">
+                                        <span class="attr__name">Age: </span>
+                                        <span class="attr__value">@animal.Age</span>
+                                    </div>
+                                    <div class="acard__column">
+                                        <span class="attr__name">Sex: </span>
+                                        <span class="attr__value">@animal.Sex</span>
+                                    </div>
+                                </div>
+                                <div class="acard__row">
+                                    <div class="acard__column">
+                                        <span class="attr__name">Weight: </span>
+                                        <span class="attr__value">@Math.Round(animal.Weight, 2) kg.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a class="action__show action_btn show__btn-align" asp-action="GetClientAnimals" asp-controller="Client"
+                                asp-route-pageIndex="@Model.Animals!.PageIndex" asp-route-animalId="@animal.Id">
+                                Manage Animal
+                            </a>
+                        </div>
+                    }
+                </div>
+                @if (Model.ActiveAnimal != null)
+                {
+                    <div class="amodal @(Model.IsInteractedWithModal ? string.Empty : "hidden") modal">
+                        <button class="modal__close-btn">X</button>
 
-        </div>
-    }
-    else
-    {
-        <div class="no_animals-wrapper">
-            <img class="no_animals-img" src="~/img/SadCat.png" alt="No Animals image">
-            <div class="no_animals-title">
-                You don't have any registered animals yet. Feel free to <span class="text-highlight">add new</span>!
+                        <div class="amodal_header-wrapper">
+                            <span class="amodal_header text-highlight">Your @(Model.ActiveAnimal!.AnimalType.Name)</span>
+                            <div class="modal_animal_image-cont">
+                                <img class="modal_animal_image" src="~/img/image_placeholder.png" alt="Modal Animal Image">
+                            </div>
+                        </div>
+
+                        @if(!string.IsNullOrEmpty(deleteError))
+                        {
+                            <span class="amodal_delete-msg">@deleteError</span>                            
+                        }
+                        <div class="form_els-wrapper">
+                            <div class="amodal__column l1">
+                                <div class="amodal__row">
+                                    <label class="profile__form-lbl lbl_position">Owner</label>
+                                    <input class="form__input-txt" type="text" value="@claimHelper.GetClaimValue(ClaimTypes.Name)" readonly>
+                                </div>
+                                <div class="amodal__row">
+                                    <label class="profile__form-lbl" asp-for="ActiveAnimal!.AnimalType.Name">Animal Type</label>
+                                    <input class="form__input-txt" type="text" asp-for="ActiveAnimal!.AnimalType.Name" readonly>
+                                </div>
+                                <div class="amodal__row">
+                                    <label class="profile__form-lbl">Weight</label>
+                                    <input class="form__input-txt" type="number" asp-for="ActiveAnimal!.Weight" readonly
+                                        min="0,1" max="30" step="0,1">
+                                </div>
+                            </div>
+                            <div class="amodal__column r1">
+                                <div class="amodal__row">
+                                    <label class="profile__form-lbl" asp-for="ActiveAnimal!.Name">Name</label>
+                                    <input class="form__input-txt" type="text" asp-for="ActiveAnimal!.Name" readonly>
+                                </div>
+                                <div class="amodal__row">
+                                    <label class="profile__form-lbl">Age</label>
+                                    <input class="form__input-txt" type="number" asp-for="ActiveAnimal!.Age" readonly
+                                        min="1" max="50" step="1">
+                                </div>
+                            </div>
+
+                            <div class="amodal__row c_span2 no_events">
+                                <label class="profile__form-lbl" asp-for="ActiveAnimal!.PhotoPath">Animal Photo</label>
+                                <label for="photo-input" class="for_input-file form__input-file-input form_file-position">
+                                    @Model.ActiveAnimal!.PhotoPath
+                                </label>
+                                <input id="photo-input" class="form__input-file form__input" asp-for="ActiveAnimal!.PhotoPath"
+                           value="@Model.ActiveAnimal!.PhotoPath" type="file" accept="image/png,image/jpeg" readonly/>
+                            </div>
+                            <div class="amodal__row c_span2">
+                                 <label asp-for="ActiveAnimal!.Preferences" class="profile__form-lbl">Animal Preferences</label>
+                                <textarea asp-for="ActiveAnimal!.Preferences" class="form__input-textarea" readonly>
+                                    @(string.IsNullOrEmpty(Model.ActiveAnimal!.Preferences) ? "Unset" : Model.ActiveAnimal!.Preferences)
+                                </textarea>
+                            </div>
+                        </div>
+
+                        <div class="animal__actions-wrapper">
+                            <a class="action__edit action_btn" asp-action="EditAnimalView" asp-controller="Client"
+                   asp-route-pageIndex="@Model.Animals!.PageIndex" asp-route-animalId="@Model.ActiveAnimal!.Id">
+                                Edit
+                                <img src="~/img/edit-pencil.png" class="action_icon" alt="Edit Animal Icon">
+                            </a>
+                            <a class="action__delete action_btn" asp-action="DeleteAnimal" asp-controller="Client"
+                   asp-route-pageIndex="@Model.Animals!.PageIndex" asp-route-animalId="@Model.ActiveAnimal!.Id">
+                                Delete
+                                <img src="~/img/trash-bin.png" class="action_icon" alt="Delete Animal Icon">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+                }
+                <div class="page__btns-wrapper">
+                    <a asp-action="GetClientAnimals" asp-controller="Client" asp-route-pageIndex="@(Model.Animals!.PageIndex - 1)"
+                       class="page__btn btn @(Model.Animals!.HasPreviousPage ? "" : "disabled")">
+                        &larr; Previous
+                    </a>
+                    <h3 class="page_index-header"> @Model.Animals.PageIndex </h3>
+                    <a asp-action="GetClientAnimals" asp-controller="Client" asp-route-pageIndex="@(Model.Animals!.PageIndex + 1)"
+                       class="page__btn btn @(Model.Animals!.HasNextPage ? "" : "disabled")">
+                        Next &rarr;
+                    </a>
+                </div>
             </div>
-        </div>
-    }
+        }
+        else
+        {
+            <div class="no_animals-wrapper">
+                <img class="no_animals-img" src="~/img/SadCat.png" alt="No Animals image">
+                <div class="no_animals-title">
+                    You don't have any <span class="text-highlight">registered animals</span> yet. Feel free to
+                    <span class="text-highlight">add new</span>!
+                </div>
+            </div>
+        }
+    </div>
 }

@@ -12,18 +12,20 @@ namespace Animal_Hotel.Models.DatabaseModels
 
         [Required]
         [StringLength(maximumLength: 40, MinimumLength = 2, ErrorMessage = "Name length should be between 2 and 40 characters")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
+        [Range(1, 50, ErrorMessage = "Animal age should be between 1 and 50")]
         public short Age { get; set; }
 
         [Required]
         public char Sex { get; set; }
 
         [Required]
-        [Range(0.1f, 100f)]
-        public float Weight { get; set; }
+        [Range(0.1d, 30d, ErrorMessage = "Animal Weight should be between 100g and 30kg")]
+        public double Weight { get; set; }
 
+        [StringLength(400, MinimumLength = 6, ErrorMessage = "Animal Preferences length should be between 6 and 400 characters")]
         public string? Preferences { get; set; }
 
         [Column("photo_name")]
@@ -34,19 +36,19 @@ namespace Animal_Hotel.Models.DatabaseModels
         [Column("owner_id")]
         [ForeignKey("Owner")]
         public long OwnerId { get; set; }
-        public Client? Owner { get; set; } = null!;
+        public Client? Owner { get; set; }
 
         [Required]
         [Column("type_id")]
         [ForeignKey("AnimalType")]
         public short TypeId { get; set; } 
-        public AnimalType AnimalType { get; set; } = null!;
+        public AnimalType? AnimalType { get; set; }
 
         public Booking? Booking { get; set; }
 
         public List<Contract> Contracts { get; set; } = new();
 
-        public Animal(string name, short age, char sex, float weight, long ownerId, short typeId, string? preferences = null,
+        public Animal(string name, short age, char sex, double weight, long ownerId, short typeId, string? preferences = null,
             string? photoPath = null)
         {
             this.Name = name;
@@ -58,5 +60,7 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.Preferences = preferences;
             this.PhotoPath = photoPath;
         }
+
+        public Animal() { }
     }
 }

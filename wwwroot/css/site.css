@@ -381,3 +381,29 @@ body {
 .action__delete {
   background-color: rgba(230, 168, 160);
 }
+
+.page__btns-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 25%;
+  margin-top: 1%;
+  margin-bottom: 2%;
+}
+
+.page__btn {
+  transition: background-color 0.2s;
+  border: none;
+  white-space: nowrap;
+  text-decoration: none;
+  color: black;
+  font-weight: 500;
+}
+
+.page_index-header {
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}

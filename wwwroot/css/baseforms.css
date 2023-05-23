@@ -18,7 +18,32 @@ input[readonly] {
   background-color: rgb(138, 138, 138, 0.5);
 }
 
+.select__readonly {
+  pointer-events: none;
+}
+
+.no_events {
+  pointer-events: none;
+}
+
 .form__input-txt:focus {
+  border: none;
+  outline: none;
+  border-bottom: 3px solid;
+  border-image-slice: 1;
+  border-image-source: var(--gradient-primary);
+}
+
+.form__input-num {
+  padding: 1px 3px;
+  font-weight: 400;
+  font-size: 1.1rem;
+  border: none;
+  border-bottom: 2px solid black;
+  transition: all 0.5s;
+}
+
+.form__input-num:focus {
   border: none;
   outline: none;
   border-bottom: 3px solid;

@@ -10,7 +10,11 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 
         public PaginatedList<Animal>? Animals { get; set; }
 
+        public IQueryable<AnimalType>? AnimalTypes { get; set; }
+
         public Animal? ActiveAnimal { get; set; }
+
+        public Review? HotelReview { get; set; }
 
         public ClientDataViewModel(UserViewModel user) 
         {
