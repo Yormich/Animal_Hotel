@@ -13,12 +13,12 @@ namespace Animal_Hotel.Models.DatabaseModels
         [Required]
         [Column("first_name")]
         [StringLength(maximumLength: 50, MinimumLength = 2, ErrorMessage = "First name length should be between 2 and 50 characters")]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required]
         [Column("last_name")]
         [StringLength(maximumLength: 50, MinimumLength = 2, ErrorMessage = "Last name length should be between 2 and 50 characters")]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         [Required]
         [Range(0, 100_000)]
@@ -38,17 +38,17 @@ namespace Animal_Hotel.Models.DatabaseModels
         [DataType(DataType.Date)]
         public DateTime HiredSince { get; set; }
 
-        public UserLoginInfo LoginInfo { get; set; } = null!;
+        public UserLoginInfo? LoginInfo { get; set; }
 
         [Required]
         [Column("photo_name")]
         [StringLength(maximumLength: 40, MinimumLength = 5, ErrorMessage = "Photo path length should be between 5 and 40 characters")]
-        public string PhotoPath { get; set; }
+        public string PhotoPath { get; set; } = string.Empty;
 
-        public List<Room> Rooms { get; set; } = new();
-        public List<RoomEmployee> RoomEmployees { get; set; } = new();
+        public List<Room>? Rooms { get; set; }
+        public List<RoomEmployee>? RoomEmployees { get; set; }
 
-        public List<Request> Requests { get; set; } = new();
+        public List<Request>? Requests { get; set; }
 
         public Employee(string firstName, string lastName, decimal salary, char sex, DateTime birthDate, 
             DateTime hiredSince, string photoPath)
@@ -61,5 +61,7 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.HiredSince = hiredSince;
             this.PhotoPath = photoPath;
         }
+
+        public Employee() { }
     }
 }

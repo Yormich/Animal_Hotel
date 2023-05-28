@@ -15,7 +15,7 @@ namespace Animal_Hotel.Models.DatabaseModels
 
         [Required]
         [StringLength(maximumLength: 300, MinimumLength = 6, ErrorMessage = "Please write a comment (length should be between 6 and 300 characters)")]
-        public string Comment { get; set; }
+        public string Comment { get; set; } = string.Empty;
 
         [Required]
         [Column("writing_date")]
@@ -27,7 +27,7 @@ namespace Animal_Hotel.Models.DatabaseModels
         [ForeignKey("Client")]
         public long ClientId { get; set; }
 
-        public Client Client { get; set; } = null!;
+        public Client? Client { get; set; }
 
         public Review(short rating, string comment, long clientId)
         {
@@ -35,5 +35,7 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.Comment = comment;
             this.ClientId = clientId;
         }
+
+        public Review() { }
     }
 }

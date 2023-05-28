@@ -1,0 +1,64 @@
+﻿@model ClientDataViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css" />
+    <link rel="stylesheet" href="~/css/requests.css" />
+    <link rel="stylesheet" href="~/css/reviewSection.css" />
+    <script defer src="~/js/review.js" type="module"></script>
+}
+
+@section Main
+{
+    <div class="client__review-wrapper">
+        <div class="client__review-header">
+            <span class="review__header text-highlight">Hotel Review Creation</span>
+        </div>
+        <form class="client__review-form" asp-action="AddReview" asp-controller="Client" method="post">
+            <input asp-for="Login" type="hidden" />
+            <input asp-for="LastName" type="hidden" />
+            <input asp-for="FirstName" type="hidden" />
+            <input asp-for="PhoneNumber" type="hidden" />
+
+            <input asp-for="HotelReview!.ClientId" type="hidden">
+
+
+            <div class="review__user-info-wrapper">
+                <div class="user_main-info-wrapper">
+                    <img class="review__user-img" src="~/img/image_placeholder.png">
+                    <h5 class="review__user-name">@($"{Model.FirstName} {Model.LastName}")</h5>
+                </div>
+                <div class="rating__wrapper">
+                    <label class="review__rating profile__form-lbl" asp-for="HotelReview">Rating:</label>
+                    <span class="review__rating">@Model.HotelReview!.Rating/10</span>
+                </div>
+            </div>
+
+            <div class="date_range-wrapper">
+                <div class="review__row">
+                    <label class="profile__form-lbl row_lbl-pos" asp-for="HotelReview!.WritingDate">Writing Date</label>
+                    <input class="form__input-date row_inp-pos" type="date" asp-for="HotelReview!.WritingDate"
+                       value="@(UtilFuncs.DateToHtmlFormatter(DateTime.Now))" readonly>
+                </div>
+
+                <div class="review__row">
+                    <label class="profile__form-lbl row_lbl-pos" asp-for="HotelReview!.Rating">Rate our Hotel</label>
+                    <input class="form__input-range row_inp-pos" type="range" min="1" step="1" max="10" asp-for="HotelReview!.Rating">
+                    <span class="row_vld-pos" asp-validation-for="HotelReview!.Rating"></span>
+                    <label class="range_input-display row_dsp-pos">@Model.HotelReview!.Rating</label>
+                </div>
+            </div>
+
+
+            <div class="comment_area-wrapper">
+                <label class="profile__form-lbl comment-lbl-pos" asp-for="HotelReview!.Comment">Comment</label>
+                <textarea class="form__input-textarea comment-txt-pos" asp-for="HotelReview!.Comment"></textarea>
+                <span class="comment-vld-pos" asp-validation-for="HotelReview!.Comment"></span>
+            </div>
+
+            <div class="manage_btns-wrapper">
+                <button class="btn__submit btn hidden" type="submit">Submit Changes</button>
+            </div>
+        </form>
+    </div>
+}

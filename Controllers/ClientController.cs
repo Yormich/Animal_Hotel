@@ -16,15 +16,20 @@ namespace Animal_Hotel.Controllers
         private readonly IUserTypeService _userTypeService;
         private readonly IMemoryCache _memoryCache;
         private readonly IIFileProvider _fileProvider;
+        private readonly IContractService _contractService;
+        private readonly IReviewService _reviewService;
 
         public ClientController(IAnimalService animalService, ClaimHelper claimHelper, IUserTypeService userTypeService,
-            IMemoryCache memoryCache, IIFileProvider fileProvider) 
+            IMemoryCache memoryCache, IIFileProvider fileProvider, IContractService contractService,
+            IReviewService reviewService) 
         {
             _animalService = animalService;
             _claimHelper = claimHelper;
             _userTypeService = userTypeService;
             _memoryCache = memoryCache;
             _fileProvider = fileProvider;
+            _contractService = contractService;
+            _reviewService = reviewService;
         }
 
         [HttpGet]
@@ -191,15 +196,74 @@ namespace Animal_Hotel.Controllers
         [ActionMapper("ClientReview", "Client", "Hotel Review")]
         public async Task<IActionResult> ClientReview()
         {
-            throw new NotImplementedException();
+            long clientId = Convert.ToInt64(_claimHelper.GetClaimValue(ClaimTypes.Sid));
+
+            ClientDataViewModel client = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache)) 
+            {
+                HotelReview = await _reviewService.GetClientReview(clientId),
+                HasFinishedContracts = await _contractService.DoesClientHasFinishedContract(clientId), 
+                ActiveAction = "ClientReview",
+            };
+
+            return View("ClientReview", client);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        public async Task<ViewResult> ReviewCreationPage()
+        {
+            ClientDataViewModel client = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache));
+            client.HotelReview = new Review()
+            {
+                ClientId = client.SubUserId,
+            };
+
+            return View("AddReview", client);
+        }
 
         [HttpPost]
         [Authorize(Roles = "Client")]
-        public async Task<IActionResult> DeleteClientReview()
+        public async Task<IActionResult> AddReview(ClientDataViewModel model)
         {
-            throw new NotImplementedException();
+            Review clientReview = model.HotelReview!;
+            model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache));
+
+            if (!ModelState.IsValid)
+            {
+                model.HotelReview = clientReview;
+                return View("AddReview", model);
+            }
+
+            await _reviewService.CreateReview(clientReview);
+
+            return RedirectToAction("ClientReview");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> UpdateClientReview(ClientDataViewModel model)
+        {
+            Review clientReview = model.HotelReview!;
+            model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache));
+
+            if (!ModelState.IsValid)
+            {
+                model.HotelReview = clientReview;
+                return View("ClientReview", model);
+            }
+
+            await _reviewService.UpdateReview(clientReview);
+
+            return RedirectToAction("ClientReview");
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> DeleteClientReview(long reviewId)
+        {
+            await _reviewService.DeleteReview(reviewId);
+
+            return RedirectToAction("ClientReview");
         }
     }
 }

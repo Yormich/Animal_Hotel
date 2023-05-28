@@ -1,0 +1,41 @@
+﻿@model HotelManagerViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/employees.css" />
+    <script defer src="~/js/modal_uni.js" type="module"></script>
+}
+
+
+@section Main
+{
+    <div class="employees-wrapper">
+        <div class="employee_header-wrapper">
+            <a asp-action="RegisterEmployeeView" asp-controller="HotelManager">Hire Employee</a>
+        </div>
+        <div class="employees-cont">
+            @foreach (var employee in Model.Employees!)
+            {
+                <div class="employee-cont-wrapper">
+                    <h3>@($"{employee.FirstName} {employee.LastName}")</h3>
+                    <h4>@employee.UserType!.Name</h4>
+                </div>
+            }
+        </div>
+        @if(Model.ActiveEmployee != null)
+        {
+            <form asp-action="UpdateEmployee" method="post">
+
+                <div class="">
+
+                </div>
+
+                <div class="modal__btns-wrapper">
+                    <a asp-action="FireEmployee" asp-controller="HotelManager">Fire Employee</a>
+                    <button class="btn__submit btn" type="submit">Submit Changes</button>
+                </div>
+            </form>
+        }
+    </div>
+    <h1>@Model.Employees!.Count</h1>
+}

@@ -16,6 +16,8 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 
         public Review? HotelReview { get; set; }
 
+        public bool HasFinishedContracts { get; set; }
+
         public ClientDataViewModel(UserViewModel user) 
         {
             this.UserId = user.UserId;

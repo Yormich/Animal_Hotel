@@ -19,20 +19,20 @@ namespace Animal_Hotel.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IUserLoginInfoService _userLoginInfoRepository;
-        private readonly IUserRegisterService _userRegisterService;
+        private readonly IClientService _clientService;
         private readonly IIFileProvider _fileProvider;
         private readonly IReviewService _reviewService;
         private readonly IRoomService _roomService;
 
-        public LoginAndRegisterController(IUserLoginInfoService userLoginsRepository, IUserRegisterService userRegisterService,
+        public LoginAndRegisterController(IUserLoginInfoService userLoginsRepository, IClientService clientService,
             IConfiguration configuration, IIFileProvider fileProvider, IReviewService reviewService, IRoomService roomService)
         {
             _configuration = configuration;
             _userLoginInfoRepository = userLoginsRepository;
-            _userRegisterService = userRegisterService;
             _fileProvider = fileProvider;
             _reviewService = reviewService;
             _roomService = roomService;
+            _clientService = clientService;
         }
 
         [HttpGet("Register")]
@@ -71,7 +71,7 @@ namespace Animal_Hotel.Controllers
                 }
             }
 
-            Response.StatusCode = await _userRegisterService.RegisterClient(model) ? 200 : 500;
+            Response.StatusCode = await _clientService.RegisterClient(model) ? 200 : 500;
 
             return RedirectToAction("Index", "AnimalHotel");
         }

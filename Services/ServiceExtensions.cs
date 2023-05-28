@@ -53,15 +53,20 @@ namespace Animal_Hotel.Services
 
             //Database services
             services.AddDbContext<AnimalHotelDbContext>();
+            
             services.AddSingleton<IDbConnectionProvider, MsSqlConnectionProvider>();
+            
             services.AddScoped<IUserLoginInfoService, UserService>();
             services.AddScoped<IReviewService, ReviewService>();
-            services.AddScoped<IUserRegisterService, UserRegisterService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IUserTypeService, UserTypeService>();
             services.AddScoped<IReviewService, ReviewService>();
+
             services.AddTransient<IRequestService, RequestService>();
             services.AddTransient<IAnimalService, AnimalService>();
+            services.AddTransient<IContractService, ContractService>();
+            services.AddTransient<IEmployeeService, EmployeeService>();
+            services.AddTransient<IClientService, ClientService>();
         }
     }
 }

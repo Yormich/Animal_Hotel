@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Diagnostics;
 #pragma warning disable IDE0090
 
 namespace Animal_Hotel.Services
@@ -19,22 +20,51 @@ namespace Animal_Hotel.Services
 
         public Task CreateReview(Review review)
         {
-            throw new NotImplementedException();
+            string sql = "INSERT INTO dbo.client_review(rating, comment, writing_date, client_id) VALUES" +
+                "(@rating, @comment, CONVERT(DATETIME, @writingDate), @clientId)";
+
+            SqlParameter ratingParam = new("rating", review.Rating);
+            SqlParameter commentParam = new("comment", review.Comment);
+            SqlParameter dateParam = new("writingDate", DateTime.Now);
+            SqlParameter clientParam = new("clientId", review.ClientId);
+
+            return _db.Database.ExecuteSqlRawAsync(sql, ratingParam, commentParam, dateParam, clientParam);
         }
 
         public Task DeleteReview(long reviewId)
         {
-            throw new NotImplementedException();
+            string sql = "DELETE FROM dbo.client_review" +
+                " WHERE id = @reviewId";
+            SqlParameter idParam = new("reviewId", reviewId);
+
+            return _db.Database.ExecuteSqlRawAsync(sql, idParam);
         }
 
         public Task<Review?> GetClientReview(long clientId)
         {
-            throw new NotImplementedException();
+            string sql = "SELECT * FROM dbo.client_review cr" +
+                " WHERE cr.client_id = @clientId";
+            SqlParameter idParam = new("clientId", clientId);
+
+            return _db.Reviews.FromSqlRaw(sql, idParam)
+                .Include(r => r.Client)
+                .AsQueryable()
+                .FirstOrDefaultAsync();
         }
 
         public Task UpdateReview(Review review)
         {
-            throw new NotImplementedException();
+            string sql = "UPDATE dbo.client_review" +
+                " SET rating = @rating, comment = @comment, " +
+                " writing_date = CONVERT(DATETIME, @writingDate)" +
+                " WHERE id = @reviewId";
+
+            SqlParameter idParam = new("reviewId", review.Id);
+            SqlParameter dateParam = new("writingDate", review.WritingDate);
+            SqlParameter commentParam = new("comment", review.Comment);
+            SqlParameter ratingParam = new("rating", review.Rating);
+
+            return _db.Database.ExecuteSqlRawAsync(sql, idParam, dateParam, commentParam, ratingParam);
         }
 
         public async Task<List<Review>> GetLastReviews(int number)
