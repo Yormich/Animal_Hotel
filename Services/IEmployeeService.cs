@@ -12,10 +12,12 @@ namespace Animal_Hotel.Services
 
         public Task<bool> UpdateEmployeeByManager(EmployeeDataViewModel employee);
 
-        public Task<bool> RegisterEmployee(EmployeeDataViewModel employee);
+        public Task<bool> RegisterEmployee(EmployeeRegisterModel employee);
 
         public Task<IQueryable<EmployeeDataViewModel>> GetEmployees(int pageIndex, int pageSize, bool excludeManagers = true);
 
         public Task<int> GetEmployeesCount(bool excludeManagers = true);
+
+        public Task<List<UserType>> GetEmployeePositions();
     }
 }

@@ -147,5 +147,12 @@ namespace Animal_Hotel.Controllers
 
             return RedirectToAction("GetEmployeeRequests", new { pageIndex });
         }
+
+        [HttpGet]
+        [Authorize(Roles = "AnimalWatcher")]
+        public async Task<IActionResult> GetWatcherRooms()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

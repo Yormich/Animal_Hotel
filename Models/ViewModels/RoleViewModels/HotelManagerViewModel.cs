@@ -1,4 +1,5 @@
 ﻿using Animal_Hotel.Models.DatabaseModels;
+using Animal_Hotel.Models.ViewModels.RegisterViewModels;
 
 namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 {
@@ -8,8 +9,12 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 
         public EmployeeDataViewModel? ActiveEmployee { get; set; }
 
+        public EmployeeRegisterModel? NewEmployee { get; set; }
+
         public HotelManagerViewModel(UserViewModel user) : base(user)
         {
         }
+
+        public HotelManagerViewModel() { }
     }
 }

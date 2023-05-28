@@ -2,8 +2,10 @@
 
 @section ScriptsAndStylesheets
 {
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
     <link rel="stylesheet" href="~/css/employees.css" />
     <script defer src="~/js/modal_uni.js" type="module"></script>
+    <script defer src="~/js/emp_modal.js" type="module"></script>
 }
 
 
@@ -11,31 +13,129 @@
 {
     <div class="employees-wrapper">
         <div class="employee_header-wrapper">
-            <a asp-action="RegisterEmployeeView" asp-controller="HotelManager">Hire Employee</a>
+            <span class="emp_page-header text-highlight">Employees</span>
+            <a class="add_employee-btn btn" asp-action="RegisterEmployeeView" asp-controller="HotelManager">Hire Employee</a>
         </div>
         <div class="employees-cont">
             @foreach (var employee in Model.Employees!)
             {
-                <div class="employee-cont-wrapper">
-                    <h3>@($"{employee.FirstName} {employee.LastName}")</h3>
-                    <h4>@employee.UserType!.Name</h4>
-                </div>
+                <a class="employee_cont-wrapper" asp-action="GetEmployees" asp-controller="HotelManager" 
+                    asp-route-pageIndex="@Model.Employees!.PageIndex" asp-route-employeeId="@employee.SubUserId">
+                    <div class="employee_cont-els">
+                        <div class="employee-img-cont">
+                            <img class="employee_img-round" src="~/img/image_placeholder.png">
+                        </div>
+                        <span class="employee_name-sp">@($"{employee.FirstName} {employee.LastName}")</span>
+                        <span class="employee_type-sp">@employee.UserType!.Name</span>
+
+                        <div class="employee_salary-wrap">
+                            <span class="emp-prop_header">Salary: </span>
+                            @Math.Round(employee.Salary, 2) ₴
+                        </div>
+                    </div>
+                </a>
             }
         </div>
         @if(Model.ActiveEmployee != null)
         {
-            <form asp-action="UpdateEmployee" method="post">
+            <form class="emp__modal modal @(!Model.IsInteractedWithModal ? "hidden" : string.Empty)" asp-action="UpdateEmployee" 
+                asp-controller="HotelManager" asp-route-pageIndex="@Model.Employees!.PageIndex" method="post">
+                <span class="modal__close-btn">X</span>
 
-                <div class="">
+                <div class="emp__modal-header">
+                    <img class="employee_img-round" src="~/img/image_placeholder.png">
+                    <span class="text-highlight emp__modal-name">
+                        @($"{Model.ActiveEmployee!.FirstName} {Model.ActiveEmployee!.LastName}")
+                    </span>
+                </div>
 
+                <input asp-for="Login" type="hidden">
+                <input asp-for="PhoneNumber" type="hidden">
+                <input asp-for="LastName" type="hidden">
+                <input asp-for="FirstName" type="hidden">
+
+                <input asp-for="ActiveEmployee!.UserId" type="hidden">
+                <input asp-for="ActiveEmployee!.SubUserId" type="hidden">
+                <input asp-for="ActiveEmployee!.LastName" type="hidden">
+                <input asp-for="ActiveEmployee!.FirstName" type="hidden">
+
+                <div class="empl_form-wrapper">
+                    <div class="em_grid-column l1">
+                        <div class="em_grid_row">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.Login">Email</label>
+                            <input class="form__input-txt form_inp-pos" type="text" asp-for="ActiveEmployee!.Login" readonly>
+                        </div>
+                        <div class="em_grid_row">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.Sex">Sex</label>
+                            <select class="form__input-select readonly form_inp-pos" asp-for="ActiveEmployee!.Sex" readonly>
+                                <option value="@Model.ActiveEmployee!.Sex" selected>@Model.ActiveEmployee!.Sex</option>
+                            </select>
+                        </div>
+                        <div class="em_grid_row">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.Salary">Salary*</label>
+                            <input class="form__input-num form_inp-pos num-salary" asp-for="ActiveEmployee!.Salary" type="number" max="100000" 
+                                min="0" step="0.1">
+                            <span class="form_vld-pos" asp-validation-for="ActiveEmployee!.Salary"></span>
+                        </div>
+                        <div class="date_grid_row">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.HiredSince">Hired Since</label>
+                            <input class="form__input-date form_inp-pos" asp-for="ActiveEmployee!.HiredSince" type="date" 
+                                value="@UtilFuncs.DateToHtmlFormatter(Model.ActiveEmployee!.HiredSince)" readonly>
+                        </div>
+                    </div>
+                    <div class="em_grid-column r1">
+                        <span class="editable-props-span">* - employee field can be edited</span>
+                        <div class="em_grid_row u2">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.PhoneNumber">Phone Number</label>
+                            <input class="form__input-txt form_inp-pos" type="text" asp-for="ActiveEmployee!.PhoneNumber" readonly>
+                        </div>
+                        <div class="em_grid_row u3">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.Position">Position*</label>
+                            <select class="form__input-select form_inp-pos pos-select" asp-for="ActiveEmployee!.Position">
+                                @foreach (UserType position in Model.EmployeeTypes!)
+                                {
+                                    if (Model.ActiveEmployee!.UserType!.Id == position.Id || Model.ActiveEmployee!.Position == position.Id)
+                                    {
+                                        <option value="@position.Id" selected>@position.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@position.Id">@position.Name</option>   
+                                    }
+                                }
+                            </select>
+                            <span class="form_vld-pos" asp-validation-for="ActiveEmployee!.Position"></span>
+                        </div>
+                        <div class="date_grid_row u4">
+                            <label class="profile__form-lbl form_lbl-pos" asp-for="ActiveEmployee!.BirthDate">Birth Date</label>
+                            <input class="form__input-date form_inp-pos" asp-for="ActiveEmployee!.BirthDate" type="date"
+                           value="@UtilFuncs.DateToHtmlFormatter(Model.ActiveEmployee!.BirthDate)" readonly>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal__btns-wrapper">
-                    <a asp-action="FireEmployee" asp-controller="HotelManager">Fire Employee</a>
-                    <button class="btn__submit btn" type="submit">Submit Changes</button>
+                    <button class="btn__submit btn hidden" type="submit">Submit Changes</button>
+                    <a class="action__delete action_btn" asp-action="FireEmployee" asp-controller="HotelManager"
+                        asp-route-employeeId="@Model.ActiveEmployee!.SubUserId">
+                        Fire Employee 
+                        <img class="action_icon" src="~/img/Fired.png">
+                    </a>
                 </div>
             </form>
+            <div class="overlay @(!Model.IsInteractedWithModal ? "hidden" : string.Empty)"></div>
         }
+
+        <div class="page__btns-wrapper">
+            <a asp-action="GetEmployees" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Employees!.PageIndex - 1)"
+               class="page__btn btn @(Model.Employees!.HasPreviousPage ? string.Empty : "disabled")">
+                &larr; Previous
+            </a>
+            <h3 class="page_index-header"> @Model.Employees!.PageIndex </h3>
+            <a asp-action="GetEmployees" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Employees!.PageIndex + 1)"
+               class="page__btn btn @(Model.Employees!.HasNextPage ? string.Empty : "disabled")">
+                Next &rarr;
+            </a>
+        </div>
     </div>
-    <h1>@Model.Employees!.Count</h1>
 }

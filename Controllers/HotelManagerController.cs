@@ -39,7 +39,9 @@ namespace Animal_Hotel.Controllers
 
             if (employeeId != null)
             {
+                manager.EmployeeTypes = await _employeeService.GetEmployeePositions();
                 manager.ActiveEmployee = await _employeeService.GetEmployeeById(employeeId);
+                manager.IsInteractedWithModal = true;
             }
 
             return View("Employees", manager);
@@ -47,9 +49,15 @@ namespace Animal_Hotel.Controllers
 
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
-        public async Task<IActionResult> RegisterEmployeeView()
+        public async Task<IActionResult> RegisterEmployeeView(int pageIndex)
         {
-            throw new NotImplementedException();
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                NewEmployee = new(),
+            };
+            TempData[$"emp_a{manager.UserId}_{pageIndex}"] = pageIndex;
+
+            return View("RegisterEmployee", manager);
         }
 
         [HttpPost]
@@ -59,11 +67,42 @@ namespace Animal_Hotel.Controllers
             throw new NotImplementedException();
         }
 
+        [HttpPost]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> UpdateEmployee(HotelManagerViewModel manager, int pageIndex)
+        {
+            EmployeeDataViewModel employee = manager.ActiveEmployee!;
+
+            if (!ModelState.IsValid)
+            {
+                int pageSize = 10;
+                manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+                {
+                    Employees = new(await _employeeService.GetEmployees(pageIndex, pageSize), 
+                    await _employeeService.GetEmployeesCount(), pageIndex, pageSize),
+                    EmployeeTypes = await _employeeService.GetEmployeePositions(),
+                    ActiveEmployee = await _employeeService.GetEmployeeById(employee.SubUserId),
+                    IsInteractedWithModal = true,
+                };
+
+                return View("Employees", manager);
+            }
+
+            if (!(await _employeeService.UpdateEmployeeByManager(employee)))
+            {
+                Response.StatusCode = 501;
+            }
+
+            return RedirectToAction("GetEmployees", new { pageIndex});
+        }
+
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
         public async Task<IActionResult> FireEmployee(long employeeId)
         {
-            throw new NotImplementedException();
+            await _employeeService.DeleteEmployee(employeeId);
+
+            return RedirectToAction("GetEmployees");
         }
     }
 }

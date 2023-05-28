@@ -1,3 +1,188 @@
+.employees-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: fit-content;
+}
+
+.employee_header-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.add_employee-btn {
+  text-decoration: none;
+  color: var(--color-dark);
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.emp_page-header {
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.employees-cont {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.employee_cont-wrapper {
+  background-color: white;
+  box-shadow: 1px 1px 4px #50504f8d;
+  color: var(--color-dark);
+  margin-top: 2%;
+  margin-right: 2%;
+  text-decoration: none;
+  height: calc(var(--index) * 13);
+  padding: 1% 2%;
+  width: 18%;
+}
+
+.employee_cont-els {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  width: 100%;
+}
+
+.employee_name-sp {
+  font-weight: 500;
+  font-size: 1.2rem;
+}
+
+.employee_type-sp {
+  font-weight: 500;
+  font-size: 1.1rem;
+  margin-top: 4%;
+  background-color: lavender;
+  padding: 4px;
+}
+
 .employee_img-round {
   border-radius: 50%;
+  height: calc(var(--index) * 4);
+  width: calc(var(--index) * 4);
+  /* border: 1px solid black; */
+  padding: 2px;
+  background-image: var(--gradient-primary);
+}
+
+.employee_salary-wrap {
+  /* align-self: flex-end; */
+  margin-bottom: 0%;
+}
+
+.emp-prop_header {
+  font-weight: 500;
+}
+
+.emp__modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: whitesmoke;
+  width: calc(var(--index) * 26);
+  height: calc(var(--index) * 30);
+  box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
+  transition: all 0.5s;
+  z-index: 200;
+  padding: calc(var(--index) * 3) calc(var(--index) * 2);
+}
+
+.emp__modal-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.emp__modal-name {
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-left: 2%;
+}
+
+.empl_form-wrapper {
+  margin-top: 2%;
+  display: grid;
+  height: 70%;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  row-gap: 2%;
+  column-gap: 3%;
+}
+
+.em_grid-column {
+  display: grid;
+  grid-row: 1/5;
+  grid-template-rows: repeat(4, 1fr);
+  row-gap: 2%;
+}
+
+.em_grid_row {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.date_grid_row {
+  display: grid;
+  grid-template-rows: 0.5fr 1fr;
+}
+
+.form_lbl-pos {
+  grid-row: 1;
+}
+
+.form_inp-pos {
+  grid-row: 2;
+}
+
+.form_vld-pos {
+  grid-row: 3;
+}
+
+.l1 {
+  grid-column: 1;
+}
+
+.r1 {
+  grid-column: 2;
+}
+
+.u2 {
+  grid-row: 2;
+}
+
+.u3 {
+  grid-row: 3;
+}
+
+.u4 {
+  grid-row: 4;
+}
+
+.modal__btns-wrapper {
+  margin-top: 3%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.editable-props-span {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.btn__submit {
+  font-weight: 500;
+  font-size: 1.2rem;
 }

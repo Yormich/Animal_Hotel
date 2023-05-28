@@ -109,7 +109,7 @@ namespace Animal_Hotel.Services
                 SqlParameter uliParam = new("uliId", employee.UserId);
                 SqlParameter employeeParam = new("employeeId", employee.SubUserId);
                 SqlParameter salaryParam = new("salary", employee.Salary);
-                SqlParameter employeeTypeParam = new("userTypeId", employee.UserType!.Id);
+                SqlParameter employeeTypeParam = new("userTypeId", employee.Position);
 
                 await _db.Database.ExecuteSqlRawAsync(sql, uliParam, employeeParam, salaryParam, employeeTypeParam);
 
@@ -121,7 +121,7 @@ namespace Animal_Hotel.Services
             }
         }
 
-        public async Task<bool> RegisterEmployee(EmployeeDataViewModel employee)
+        public async Task<bool> RegisterEmployee(EmployeeRegisterModel employee)
         {
             string sql = "EXEC RegisterEmployee" +
                 " @Login = @login," +
@@ -139,9 +139,9 @@ namespace Animal_Hotel.Services
             try
             {
                 SqlParameter email = new SqlParameter("email", employee.Login);
-                SqlParameter password = new SqlParameter("password", employee.NewPassword);
+                SqlParameter password = new SqlParameter("password", employee.Password);
                 SqlParameter phoneNumber = new SqlParameter("phone", employee.PhoneNumber);
-                SqlParameter employeeType = new SqlParameter("employeeType", employee.UserType!.Id);
+                SqlParameter employeeType = new SqlParameter("employeeType", employee.EmployeeTypeId);
                 SqlParameter first = new SqlParameter("firstname", employee.FirstName);
                 SqlParameter last = new SqlParameter("lastname", employee.LastName);
                 SqlParameter salary = new SqlParameter("salary", employee.Salary);
@@ -160,6 +160,14 @@ namespace Animal_Hotel.Services
             {
                 return false;
             }
+        }
+
+        public Task<List<UserType>> GetEmployeePositions()
+        {
+            string sql = "SELECT * FROM dbo.user_type ut" +
+                " WHERE ut.id <> 1;";
+
+            return _db.UserTypes.FromSqlRaw(sql).AsQueryable().ToListAsync();
         }
     }
 }

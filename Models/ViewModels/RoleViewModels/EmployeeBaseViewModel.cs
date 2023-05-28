@@ -4,6 +4,8 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 {
     public class EmployeeBaseViewModel : UserViewModel
     {
+        public List<UserType>? EmployeeTypes { get; set; }
+
         public PaginatedList<Request>? Requests { get; set; }
 
         public Request? ActiveRequest { get; set; }

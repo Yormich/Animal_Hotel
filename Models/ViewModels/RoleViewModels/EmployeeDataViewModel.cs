@@ -14,7 +14,8 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
         [Required]
         public char Sex { get; set; }
 
-        public PaginatedList<Request>? Requests { get; set; } 
+
+        public short Position { get; set; }
 
         public EmployeeDataViewModel() 
         {
