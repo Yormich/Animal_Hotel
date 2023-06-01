@@ -10,5 +10,6 @@
     var(--color-primary),
     var(--color-secondary)
   );
+  --base-shadow: 1px 1px 4px #50504f8d;
   --gradient-secondary: linear-gradient(to top left, #000000, #000000);
 }

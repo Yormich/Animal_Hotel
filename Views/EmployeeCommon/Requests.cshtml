@@ -12,19 +12,6 @@
     string statusAbleToDelete = "Sent";
 }
 
-@functions{
-    string CutRequestTextIfNeeded(string text, int maxLength = 100)
-    {
-        if(text.Length <= maxLength)
-        {
-            return text;
-        }
-
-        string cutter = "...";
-        return $"{text[0..(maxLength - cutter.Length)]}{cutter}";
-    }
-}
-
 @section Main 
 {
     <div class="requests_wrapper">
@@ -63,7 +50,7 @@
                         <div class="request_comment_actions">
                             <span class="request_prop_header">Request text:</span>
 
-                            @CutRequestTextIfNeeded(request.Text)
+                            @request.RequestCuttedToMaxLength()
 
                             <div class="request_actions">
                                 <a class="action__show action_btn" asp-action="GetEmployeeRequests"

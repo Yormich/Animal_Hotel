@@ -67,7 +67,7 @@ namespace Animal_Hotel.Controllers
         [Authorize(Roles = "Client")]
         public async Task<IActionResult> UpdateClient(ClientDataViewModel model)
         {
-            if ((DateTime.Now.Subtract(model.BirthDate).Days / 365) < 16)
+            if (!UtilFuncs.IsUserOldEnough(model.BirthDate, 16))
             {
                 ModelState.AddModelError("BirthDate", "You should be older 16 to use client permissions");
             }
@@ -88,7 +88,7 @@ namespace Animal_Hotel.Controllers
         [Authorize(Roles = "AnimalWatcher,Receptionist,HotelManager")]
         public async Task<IActionResult> UpdateEmployee(EmployeeDataViewModel model)
         {
-            if ((DateTime.Now.Subtract(model.BirthDate).Days / 365) < 18)
+            if (!UtilFuncs.IsUserOldEnough(model.BirthDate, 18))
             {
                 ModelState.AddModelError("BirthDate", "You should be older 18 to work in Animal Hotel");
             }
@@ -97,14 +97,6 @@ namespace Animal_Hotel.Controllers
 
             if (!ModelState.IsValid)
             {
-                foreach(var prop in ModelState)
-                {
-                    Console.WriteLine(prop.Key);
-                    foreach(var err in prop.Value.Errors)
-                    {
-                        Console.WriteLine($"\t {err.ErrorMessage}");
-                    }
-                }
                 return View("EmployeePersonalData", model);
             }
 
@@ -118,7 +110,7 @@ namespace Animal_Hotel.Controllers
             await UpdatePasswordIfChanged(model);
             await UpdateProfileFileIfPassed(model, HttpContext.Request.Form.Files,
                 (await _userLoginService.GetUserPhotoPathById(model.UserId))!);
-
+            await CheckUserUniqueData(model);
             var userTypeT = _userTypeService.GetUserTypeByUserId(model.UserId);
             model.Actions = await actionsBuilder;
             model.UserType = await userTypeT;
@@ -185,6 +177,17 @@ namespace Animal_Hotel.Controllers
                 }
             }
             return Task.CompletedTask;
+        }
+
+        private async Task CheckUserUniqueData(UserViewModel model)
+        {
+            //because in profile we can update only phone number, we passing empty string in email to verificate only phone number
+            var userDataCheckResult = await _userLoginService.IsUserWithPhoneAndEmailExists(string.Empty, model.PhoneNumber);
+
+            if (userDataCheckResult.isExists)
+            {
+                ModelState.AddModelError("PhoneNumber", "User with this phone number already exists");
+            }
         }
     }
 }

@@ -19,13 +19,17 @@ namespace Animal_Hotel.Models.DatabaseModels
         [ForeignKey("RoomType")]
         public short RoomTypeId { get; set; }
 
-        public RoomType RoomType { get; set; } = null!;
+        public RoomType? RoomType { get; set; }
 
         public List<Employee> Employees { get; set; } = new();
 
         public List<RoomEmployee> RoomEmployees { get; set; } = new();
 
         public List<AnimalEnclosure> Enclosures { get; set; } = new();
+
+        [Required]
+        [Column("unable_to_book")]
+        public bool UnableToBook { get; set; }
 
         public Room(string photoPath, short roomTypeId)
         {

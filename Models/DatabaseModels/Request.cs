@@ -35,5 +35,17 @@ namespace Animal_Hotel.Models.DatabaseModels
         public Employee? Writer { get; set; }
 
         public Request() { }
+
+
+        public string RequestCuttedToMaxLength(int maxLength = 100)
+        {
+            if (this.Text.Length <= maxLength)
+            {
+                return this.Text;
+            }
+
+            string cutter = "...";
+            return $"{this.Text[0..(maxLength - cutter.Length)]}{cutter}";
+        }
     }
 }

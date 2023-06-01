@@ -20,6 +20,16 @@ namespace Animal_Hotel
             return htmlDate;
         }
 
+        public static bool IsUserOldEnough(DateTime birthDate, int requiredAge)
+        {
+            int age = DateTime.Now.Year - birthDate.Year;
+            if (birthDate > DateTime.Now.AddYears(-age))
+            {
+                age--;
+            }
+            return age >= requiredAge;
+        }
+
         public static string Sha256_Hash(string value)
         {
             var sb = new StringBuilder();

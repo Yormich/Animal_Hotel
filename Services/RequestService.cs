@@ -104,5 +104,44 @@ namespace Animal_Hotel.Services
             SqlParameter statusParam = new SqlParameter("status", status);
             return _db.RequestStatuses.FromSqlRaw(sql, statusParam).FirstOrDefaultAsync();
         }
+
+        public Task<IQueryable<Request>> GetRequestsForManager(int pageIndex, int pageSize)
+        {
+            string sql = "SELECT * FROM dbo.request r" +
+                " ORDER BY r.status_id, r.writing_date" +
+                " OFFSET @skipAmount ROWS" +
+                " FETCH NEXT @toTake ROWS ONLY";
+
+            SqlParameter skipParam = new("skipAmount", pageSize * (pageIndex - 1));
+            SqlParameter toTakeParam = new("toTake", pageSize);
+
+            return Task.Run(() => _db.Requests.FromSqlRaw(sql, skipParam, toTakeParam)
+                .Include(r => r.Writer)
+                .Include(r => r.Status)
+                .AsQueryable());
+        }
+
+        public Task<int> GetAllRequestsCount()
+        {
+            return _db.Requests.CountAsync();
+        }
+
+        public Task<List<RequestStatus>> GetRequestStatusesForUpdate()
+        {
+            string sql = "SELECT * FROM dbo.request_status rs";
+            return _db.RequestStatuses.FromSqlRaw(sql).ToListAsync();
+        }
+
+        public Task UpdateRequestStatus(long requestId, short statusId)
+        {
+            string sql = "UPDATE dbo.request" +
+                " SET status_id = @statusId" +
+                " WHERE id = @requestId";
+
+            SqlParameter requestParam = new("requestId", requestId);
+            SqlParameter statusParam = new("statusId", statusId);
+
+            return _db.Database.ExecuteSqlRawAsync(sql, requestParam, statusParam);
+        }
     }
 }

@@ -16,7 +16,7 @@
                     <img class="room__img" src="~/img/image_placeholder.png">  @*room.PhotoPath*@
                     <div class="room__info-wrapper">
                         <h1 class="room__title">Room @room.Id</h1>
-                        <span class="room__type">@(room.RoomType.Type)</span>
+                        <span class="room__type">@(room.RoomType!.Type)</span>
                         <h3 class="room__enclosures-amount">Number of Enclosures: @(room.Enclosures.Count)</h3>
                         <div class="room__pricing-info">
                             <span class="pricing">
@@ -51,7 +51,7 @@
     <div class="page__btns-wrapper">
         <a asp-action="Rooms" asp-controller="AnimalHotel" 
             asp-route-pageIndex="@(Model.Rooms.PageIndex - 1)" 
-            class="page__btn btn @(!Model.Rooms.HasPreviousPage ? "disabled" : "")">Previous %larr;</a>
+            class="page__btn btn @(!Model.Rooms.HasPreviousPage ? "disabled" : "")">&larr; Previous</a>
         <span class="page__index">@Model.Rooms.PageIndex</span>
         <a asp-action="Rooms" asp-controller="AnimalHotel" 
             asp-route-pageIndex="@(Model.Rooms.PageIndex + 1)" 

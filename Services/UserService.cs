@@ -212,5 +212,22 @@ namespace Animal_Hotel.Services
 
             await _db.Database.ExecuteSqlRawAsync(sql, passwordParam, idParam);
         }
+
+        public async Task<(bool isExists, string errorMessage)> IsUserWithPhoneAndEmailExists(string email, string phone)
+        {
+            (bool IsExists, string errorMessage) result = (false, string.Empty);
+            string sql = "SELECT * FROM dbo.user_login_info uli" +
+                " WHERE uli.login = @email OR uli.phone_number = @phoneNumber";
+
+            SqlParameter emailParam = new("email", email);
+            SqlParameter phoneParam = new("phoneNumber", phone);
+
+            if (await _db.LoginInfos.FromSqlRaw(sql, emailParam, phoneParam).AsQueryable().AnyAsync())
+            {
+                result = (true, "User with such email or phone number already exists");
+            }
+
+            return result;
+        }
     }
 }

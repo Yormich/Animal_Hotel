@@ -16,7 +16,9 @@ namespace Animal_Hotel.Services
 
         public Task UpdatePasswordById(long userId, string password);
 
-        //TODO: split this methods acroos services
+        public Task<(bool isExists, string errorMessage)> IsUserWithPhoneAndEmailExists(string email, string phone);
+
+        //TODO: split this methods across services
         public Task<bool> UpdateClient(ClientDataViewModel clientViewModel);
 
         public Task<bool> UpdateEmployeePersonalData(EmployeeDataViewModel employeeViewModel);

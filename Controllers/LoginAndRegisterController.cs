@@ -44,14 +44,21 @@ namespace Animal_Hotel.Controllers
         [HttpPost("/Register")]
         public async Task<IActionResult> ConfirmClientRegistration(ClientRegisterModel model)
         {
-            if (!ModelState.IsValid)
+            var isUserDataUnique = await _userLoginInfoRepository.IsUserWithPhoneAndEmailExists(model.Login, model.PhoneNumber);
+
+            if (isUserDataUnique.isExists)
             {
-                return View("Register", model);
+                ModelState.AddModelError("PhoneNumber", isUserDataUnique.errorMessage);
+                ModelState.AddModelError("Login", isUserDataUnique.errorMessage);
             }
 
-            if ((DateTime.Now.Subtract(model.BirthDate).Days / 365 ) < 16)
+            if (!UtilFuncs.IsUserOldEnough(model.BirthDate, 16))
             {
-                ModelState.AddModelError("BirthDate", "You should be older 16 to create an account");
+                ModelState.AddModelError("BirthDate", "Client should be older than 16 to register");
+            }
+
+            if (!ModelState.IsValid)
+            {
                 return View("Register", model);
             }
 
@@ -67,8 +74,12 @@ namespace Animal_Hotel.Controllers
                 else
                 {
                     ModelState.AddModelError("PhotoPath", "This file extension is not supported");
-                    return View("Register", model);
                 }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View("Register", model);
             }
 
             Response.StatusCode = await _clientService.RegisterClient(model) ? 200 : 500;
@@ -132,7 +143,6 @@ namespace Animal_Hotel.Controllers
             int count = await _roomService.GetRoomsCountAsync();
             model.Rooms = new(rooms, count, index, size);
         }
-
         private string CreateToken(UserLoginInfo user)
         {
             string firstName = user.Client?.FirstName ?? user.Employee!.FirstName;

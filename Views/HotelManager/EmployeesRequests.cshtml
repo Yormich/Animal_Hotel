@@ -1,0 +1,124 @@
+﻿@model HotelManagerViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="/css/baseforms.css" />
+    <link rel="stylesheet" href="/css/requests.css" />
+    <script type="module" defer src="~/js/modal_uni.js"></script>
+    <script type="module" defer src="~/js/manager_requests.js"></script>
+}
+
+@section Main
+{
+    <div class="requests_wrapper">
+        <div class="requests_header">
+            <h1 class="text-highlight">Employees Requests</h1>
+        </div>
+        <div class="mrequests_container">
+            @foreach (Request request in Model.Requests!)
+            {
+                <a class="mrequest_cont" asp-action="GetEmployeesRequests" asp-controller="HotelManager"
+                asp-route-pageIndex="@(Model.Requests!.PageIndex)" asp-route-requestId="@request.Id">
+                    <span class="mr_request-name">Request @request.Id</span>
+                    <div class="request_status-cont">
+                        <span class="request_prop_header">Status: </span>
+                        <span class="request_status request_@(string.Join('_',request!.Status!.Status
+                                                 .ToLower()
+                                                 .Split(' ',StringSplitOptions.RemoveEmptyEntries)))">
+                            @request.Status!.Status
+                        </span>
+                    </div>
+                    <div class="request_writing-cont">
+                        <div class="mr_date">
+                            <span class="request_prop_header">Writing Date:</span>
+                            <span class="req_date">
+                                @request.WritingDate
+                            </span>
+                        </div>
+                        <div class="mr_writer">
+                            <span class="request_prop_header">Writer:</span>
+                            <span class="req_writer">
+                                @($"{request.Writer!.FirstName} {request.Writer!.LastName}")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mr_req-text">
+                        <span class="request_prop_header">Request Text:</span>
+                        <span class="request_text">
+                            @request.RequestCuttedToMaxLength(200)
+                        </span>
+                    </div>
+                </a>
+            }
+        </div>
+        @if(Model.ActiveRequest != null)
+        {
+            <div class="modal @(Model.IsInteractedWithModal ? string.Empty : "hidden")">
+                <button class="modal__close-btn">X</button>
+
+                <h1 class="mr_header text-highlight">Request @Model.ActiveRequest!.Id</h1>
+                <form class="mr_form" asp-action="ChangeRequestStatus" asp-controller="HotelManager" method="post">
+                    <input asp-for="UserId" type="hidden">
+                    <input asp-for="Login" type="hidden">
+                    <input asp-for="PhoneNumber" type="hidden">
+                    <input asp-for="FirstName" type="hidden">
+                    <input asp-for="LastName" type="hidden">
+
+                    <input asp-for="ActiveRequest!.Id" type="hidden">
+                    <div class="mreq_els-wrapper">
+                        <div class="mr_form_column l1">
+                            <div class="mr_form_row">
+                                <label class="profile__form-lbl">Writer</label>
+                                <input class="form__input-txt"
+                                       value="@($"{Model.ActiveRequest!.Writer!.FirstName} {Model.ActiveRequest!.Writer!.FirstName}")" readonly>
+                            </div>
+                            <div class="mr_form_row-date">
+                                <label class="profile__form-lbl" asp-for="ActiveRequest!.WritingDate">Writing Date</label>
+                                <input class="form__input-date" asp-for="ActiveRequest!.WritingDate" type="date"
+                               value="@(UtilFuncs.DateToHtmlFormatter(Model.ActiveRequest!.WritingDate))" readonly>
+                            </div>
+                        </div>
+                        <div class="mr_form_column r1">
+                            <div class="mr_form_row">
+                                <label class="profile__form-lbl" asp-for="ActiveRequest!.StatusId">Status</label>
+                                <select class="status__select form__input-select" asp-for="ActiveRequest!.StatusId"
+                                   >
+                                    @foreach (RequestStatus status in Model.RequestStatuses!)
+                                    {
+                                        if (Model.ActiveRequest!.Status!.Id == status.Id)
+                                        {
+                                            <option value="@status.Id" selected>@status.Status</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@status.Id">@status.Status</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mr_form-text">
+                            <label class="profile__form-lbl">Request Text</label>
+                            <textarea class="form__input-textarea" readonly>@Model.ActiveRequest!.Text</textarea>
+                        </div>
+                    </div>
+
+                    <button class="btn__submit btn hidden">Submit</button>
+                </form>
+            </div>
+
+            <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+        }
+    </div>
+    <div class="page__btns-wrapper">
+        <a asp-action="GetEmployeesRequests" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Requests!.PageIndex - 1)"
+           class="page__btn btn @(Model.Requests!.HasPreviousPage ? string.Empty : "disabled")">
+            &larr; Previous
+        </a>
+        <h3 class="page_index-header"> @Model.Requests!.PageIndex </h3>
+        <a asp-action="GetEmployeesRequests" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Requests!.PageIndex + 1)"
+           class="page__btn btn @(Model.Requests!.HasNextPage ? string.Empty : "disabled")">
+            Next &rarr;
+        </a>
+    </div>
+}

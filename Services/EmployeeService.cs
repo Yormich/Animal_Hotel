@@ -138,7 +138,7 @@ namespace Animal_Hotel.Services
 
             try
             {
-                SqlParameter email = new SqlParameter("email", employee.Login);
+                SqlParameter email = new SqlParameter("login", employee.Login);
                 SqlParameter password = new SqlParameter("password", employee.Password);
                 SqlParameter phoneNumber = new SqlParameter("phone", employee.PhoneNumber);
                 SqlParameter employeeType = new SqlParameter("employeeType", employee.EmployeeTypeId);
@@ -147,7 +147,7 @@ namespace Animal_Hotel.Services
                 SqlParameter salary = new SqlParameter("salary", employee.Salary);
                 SqlParameter sex = new SqlParameter("sex", employee.Sex);
                 SqlParameter hiredSince = new SqlParameter("hiredSince", employee.HiredSince);
-                SqlParameter photo = new SqlParameter("photopath", employee.PhotoPath);
+                SqlParameter photo = new SqlParameter("photo", employee.PhotoPath);
                 SqlParameter birthDate = new SqlParameter("birthdate", employee.BirthDate);
 
 
@@ -156,8 +156,9 @@ namespace Animal_Hotel.Services
                 return true;
 
             }
-            catch (SqlException)
+            catch (SqlException e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
