@@ -9,10 +9,9 @@ namespace Animal_Hotel.Models.DatabaseModels
         [Key]
         public short Id { get; set; }
 
-        [Required]
         [Column("photo_name")]
         [StringLength(maximumLength:60, ErrorMessage = "Photo file name length should be less than 60 characters")]
-        public string PhotoPath { get; set; }
+        public string PhotoPath { get; set; } = string.Empty;
 
         [Required]
         [Column("room_type_id")]
@@ -21,20 +20,29 @@ namespace Animal_Hotel.Models.DatabaseModels
 
         public RoomType? RoomType { get; set; }
 
-        public List<Employee> Employees { get; set; } = new();
+        public List<Employee>? Employees { get; set; }
 
-        public List<RoomEmployee> RoomEmployees { get; set; } = new();
+        public List<RoomEmployee>? RoomEmployees { get; set; }
 
-        public List<AnimalEnclosure> Enclosures { get; set; } = new();
+        public List<AnimalEnclosure>? Enclosures { get; set; }
 
         [Required]
         [Column("unable_to_book")]
         public bool UnableToBook { get; set; }
+
+
+        [NotMapped]
+        public int ResponsibleEmployeesCount { get; set; }
+
+        [NotMapped]
+        public int AvailableEnclosuresAmount { get; set; }
 
         public Room(string photoPath, short roomTypeId)
         {
             this.PhotoPath = photoPath;
             this.RoomTypeId = roomTypeId;
         }
+
+        public Room() { }
     }
 }

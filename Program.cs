@@ -1,9 +1,4 @@
 using Animal_Hotel;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text.Encodings;
-using System.Runtime.CompilerServices;
-using System.Text;
 using Animal_Hotel.Services;
 
 var builder = WebApplication.CreateBuilder(args);

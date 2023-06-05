@@ -14,6 +14,10 @@ input[readonly] {
   background-color: rgb(138, 138, 138, 0.5);
 }
 
+.sreadonly {
+  pointer-events: none;
+}
+
 .readonly {
   background-color: rgb(138, 138, 138, 0.5);
 }
@@ -24,6 +28,13 @@ input[readonly] {
 
 .no_events {
   pointer-events: none;
+}
+
+.form_input-checkbox {
+  min-height: calc(var(--index));
+  min-width: calc(var(--index));
+  cursor: pointer;
+  margin: 2%;
 }
 
 .form__input-range {

@@ -19,10 +19,12 @@ namespace Animal_Hotel.Controllers
         private readonly IUserLoginInfoService _userService;
         private readonly IIFileProvider _fileProvider;
         private readonly IRequestService _requestService;
+        private readonly IRoomService _roomService;
+        private readonly IEnclosureService _enclosureService;
 
         public HotelManagerController(ClaimHelper claimHelper, IUserTypeService userTypeService, IMemoryCache memoryCache,
             IEmployeeService employeeService, IUserLoginInfoService userSerice, IIFileProvider fileProvider,
-            IRequestService requestService)
+            IRequestService requestService, IRoomService roomService, IEnclosureService enclosureService)
         {
             _claimHelper = claimHelper;
             _userTypeService = userTypeService;
@@ -31,6 +33,8 @@ namespace Animal_Hotel.Controllers
             _userService = userSerice;
             _fileProvider = fileProvider;
             _requestService = requestService;
+            _roomService = roomService;
+            _enclosureService = enclosureService;
         }
 
         [HttpGet]
@@ -86,35 +90,11 @@ namespace Animal_Hotel.Controllers
 
             if (!ModelState.IsValid)
             {
-                foreach(var en in ModelState)
-                {
-                    Console.WriteLine(en.Key);
-                    foreach(var e in en.Value.Errors)
-                    {
-                        Console.WriteLine($"\t{e.ErrorMessage}");
-                    }
-                }
                 return View("RegisterEmployee", await RecoverModelFromRegister(newEmployee));
             }
 
             IFormFileCollection files = HttpContext.Request.Form.Files;
-            if (files.Any())
-            {
-                var file = HttpContext.Request.Form.Files[0];
-                if (_fileProvider.IsFileExtensionSupported(file.FileName))
-                {
-                    newEmployee.PhotoPath = file.FileName;
-                    await _fileProvider.UploadFileToServer(file, $"{model.Login}_{file.FileName}");
-                }
-                else
-                {
-                    ModelState.AddModelError("NewEmployee.PhotoPath", "This file extension is not supported");
-                }
-            }
-            else
-            {
-                ModelState.AddModelError("NewEmployee.PhotoPath", "Employee photo required for registration");
-            }
+            await this.HandleEmployeePhotoFiles(newEmployee, files);
 
             if (!ModelState.IsValid)
             {
@@ -168,16 +148,165 @@ namespace Animal_Hotel.Controllers
 
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
+        [ActionMapper("HotelRooms", "HotelManager", "Rooms")]
         public async Task<IActionResult> HotelRooms(int? pageIndex)
+        {
+            int index = pageIndex ?? 1, pageSize = 10;
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveAction = "HotelRooms",
+                Rooms = new PaginatedList<Room>(await _roomService.GetManagerRoomsByPageIndex(index, pageSize),
+                    await _roomService.GetRoomsCountAsync(true), index, pageSize),
+            };
+            return View("RoomsManagement", manager);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> ManagerRoomInformation(short roomId, long? enclosureId, long? employeeId)
+        {
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveRoom = await _roomService.GetManagerRoomInfo(roomId),
+            };
+
+            if (enclosureId != null)
+            {
+                manager.IsInteractedWithModal = true;
+                manager.ActiveEnclosure = await _enclosureService.GetEnclosureById(enclosureId);
+            }
+
+            if (employeeId != null)
+            {
+                manager.IsInteractedWithModal = true;
+                manager.ActiveEmployee = await _employeeService.GetEmployeeById(employeeId);
+            }
+
+            return View("RoomFullInfo", manager);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> RoomCreationPage(int pageIndex)
+        {
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveRoom = new(),
+                RoomTypes = await _roomService.GetRoomTypes(),
+            };
+
+            TempData[$"{manager.UserId}_aroom"] = pageIndex;
+
+            return View("AddRoom", manager);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> CreateRoom(HotelManagerViewModel model)
+        {
+            Room activeRoom = model.ActiveRoom!;
+            IFormFile? file = HandleRoomPhotoFiles(HttpContext.Request.Form.Files);
+            
+            activeRoom.PhotoPath = file?.FileName ?? string.Empty;
+            if (!ModelState.IsValid)
+            {
+                model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+                {
+                    ActiveRoom = activeRoom,
+                    RoomTypes = await _roomService.GetRoomTypes(),
+                };
+                return View("AddRoom", model);
+            }
+
+            short insertedId = await _roomService.CreateRoom(activeRoom);
+            await _fileProvider.UploadFileToServer(file!, $"room_{insertedId}_{file!.FileName}");
+
+            int pageIndex = (int)TempData[$"{model.UserId}_aroom"]!;
+
+            return RedirectToAction("HotelRooms", new {pageIndex});
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> EditRoomPage(short roomId)
+        {
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveRoom = await _roomService.GetRoomBaseInfoById(roomId),
+                RoomTypes = await _roomService.GetRoomTypes(),
+            };
+
+            return View("EditRoom", manager);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> UpdateRoom(HotelManagerViewModel model)
+        {
+            Room updatedRoom = model.ActiveRoom!;
+            var files = HttpContext.Request.Form.Files;
+
+            if (files.Any())
+            {
+                var file = files[0];
+                if (_fileProvider.IsFileExtensionSupported(file.FileName) && ModelState.IsValid)
+                {
+                    await _fileProvider.RemoveFileFromServer($"room_{updatedRoom.Id}_{file!.FileName}");
+                    updatedRoom.PhotoPath = file.FileName;
+                    await _fileProvider.UploadFileToServer(file, $"room_{updatedRoom.Id}_{file!.FileName}");
+                }
+                else
+                {
+                    ModelState.AddModelError("NewEmployee.PhotoPath", "This file extension is not supported");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+                {
+                    ActiveRoom = updatedRoom,
+                    RoomTypes = await _roomService.GetRoomTypes(),
+                };
+
+                return View("EditRoom", model);
+            }
+
+            //TODO: transaction
+            await _roomService.UpdateRoom(updatedRoom);
+            await _roomService.RemoveNotPreferrableEmployees(updatedRoom.Id);
+
+            return RedirectToAction("ManagerRoomInformation", new {roomId = model.ActiveRoom!.Id});
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> AddResponsibleEmployee(short roomId)
         {
             throw new NotImplementedException();
         }
 
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
-        public async Task<IActionResult> RoomInformation(short roomId)
+        public async Task<IActionResult> AddAnimalEnclosureToRoom(short roomId)
         {
             throw new NotImplementedException();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> DeleteRoom(short roomId)
+        {
+            if (await _roomService.IsRoomHasAnyActiveContractsOrBookings(roomId))
+            {
+                TempData["roomDeleteErrorMessage"] = "You can't delete room until there is any booking or active contract." +
+                    " Try to to make room unable to be booked and wait till booking and contracts expire.";
+
+                return RedirectToAction("ManagerRoomInformation", new { roomId });
+            }
+            await _roomService.RemoveRoom(roomId);
+
+            return RedirectToAction("HotelRooms");
         }
 
         [HttpGet]
@@ -227,6 +356,46 @@ namespace Animal_Hotel.Controllers
             };
 
             return model;
+        }
+
+        private IFormFile? HandleRoomPhotoFiles(IFormFileCollection files)
+        {
+            IFormFile? file = null;
+            if (files.Any())
+            {
+                var fileToCheck = files[0];
+                if (!_fileProvider.IsFileExtensionSupported(fileToCheck.FileName))
+                {
+                    ModelState.AddModelError("ActiveRoom.PhotoPath", "This file extension is not supported");
+                }
+                else
+                {
+                    file = files[0];
+                }
+            }
+
+            return file;
+        }
+
+        private async Task HandleEmployeePhotoFiles(EmployeeRegisterModel newEmployee, IFormFileCollection files)
+        {
+            if (files.Any())
+            {
+                var file = files[0];
+                if (_fileProvider.IsFileExtensionSupported(file.FileName))
+                {
+                    newEmployee.PhotoPath = file.FileName;
+                    await _fileProvider.UploadFileToServer(file, $"{newEmployee.Login}_{file.FileName}");
+                }
+                else
+                {
+                    ModelState.AddModelError("NewEmployee.PhotoPath", "This file extension is not supported");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("NewEmployee.PhotoPath", "Employee photo required for registration");
+            }
         }
 
         private async Task CheckEmployeeLoginAndPhone(EmployeeRegisterModel employee)

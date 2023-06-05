@@ -55,7 +55,11 @@ namespace Animal_Hotel.Services
             services.AddDbContext<AnimalHotelDbContext>();
             
             services.AddSingleton<IDbConnectionProvider, MsSqlConnectionProvider>();
-            
+            services.AddSingleton<IImagePathProvider, ImagePathProvider>();
+
+            //for correct injection in room service
+            services.AddTransient<IEnclosureService, EnclosureService>();
+
             services.AddScoped<IUserLoginInfoService, UserService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IRoomService, RoomService>();
@@ -67,6 +71,7 @@ namespace Animal_Hotel.Services
             services.AddTransient<IContractService, ContractService>();
             services.AddTransient<IEmployeeService, EmployeeService>();
             services.AddTransient<IClientService, ClientService>();
+            services.AddTransient<IEnclosureService, EnclosureService>();
         }
     }
 }

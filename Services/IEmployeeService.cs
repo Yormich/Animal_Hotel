@@ -19,5 +19,9 @@ namespace Animal_Hotel.Services
         public Task<int> GetEmployeesCount(bool excludeManagers = true);
 
         public Task<List<UserType>> GetEmployeePositions();
+
+        public Task MakeEmployeeResponsibleForRoom(RoomEmployee roomEmployee);
+
+        public Task RemoveEmployeeResponsibility(RoomEmployee roomEmployee);
     }
 }

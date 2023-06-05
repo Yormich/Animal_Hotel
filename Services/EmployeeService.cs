@@ -166,9 +166,28 @@ namespace Animal_Hotel.Services
         public Task<List<UserType>> GetEmployeePositions()
         {
             string sql = "SELECT * FROM dbo.user_type ut" +
-                " WHERE ut.id <> 1;";
+                " WHERE ut.id <> 1";
 
             return _db.UserTypes.FromSqlRaw(sql).AsQueryable().ToListAsync();
+        }
+
+        public Task MakeEmployeeResponsibleForRoom(RoomEmployee roomEmployee)
+        {
+            string sql = "INSERT INTO dbo.room_employee(employee_id, room_id) VALUES(@employeeId, @roomId)";
+            SqlParameter employeeParam = new("employeeId", roomEmployee.EmployeeId);
+            SqlParameter roomParam = new("roomId", roomEmployee.RoomId);
+
+            return _db.Database.ExecuteSqlRawAsync(sql, employeeParam, roomParam);
+        }
+
+        public Task RemoveEmployeeResponsibility(RoomEmployee roomEmployee)
+        {
+            string sql = "DELETE FROM dbo.room_employee" +
+                " WHERE employee_id = @employeeId AND room_id = @roomId";
+            SqlParameter employeeParam = new("employeeId", roomEmployee.EmployeeId);
+            SqlParameter roomParam = new("roomId", roomEmployee.RoomId);
+
+            return _db.Database.ExecuteSqlRawAsync(sql, employeeParam, roomParam);
         }
     }
 }

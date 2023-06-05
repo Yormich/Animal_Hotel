@@ -1,0 +1,151 @@
+﻿@model HotelManagerViewModel
+
+@{
+    bool isEnclosureCompatible = Model.ActiveRoom!.RoomType!.Id == 1;
+    string? roomDeleteErrorMessage = TempData["roomDeleteErrorMessage"] as string;
+}
+
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/enclosures.css" />
+    <link rel="stylesheet" href="~/css/employees.css"/>
+    <link rel="stylesheet" href="~/css/rooms.css" />
+    <link rel="stylesheet" href="~/css/baseforms.css" />
+    <script defer type="module" src="~/js/modal_uni.js"></script>
+}
+
+@section Main
+{
+    <div class="room_full-wrapper">
+        <span class="room_name-span text-highlight">Room @Model.ActiveRoom!.Id</span>
+        <div class="room_full-cont">
+            <div class="room_info-cont">
+                <div class="room_type-status-wrapper">
+                    <span class="room_type-span">
+                        @Model.ActiveRoom!.RoomType!.Type
+                    </span>
+                    <span class="room_status-span">
+                        <span class="demibold">
+                            Room Status: 
+                        </span>
+                        <span class="@(Model.ActiveRoom!.UnableToBook ? "not_" : string.Empty)available_status">
+                            Is @(Model.ActiveRoom!.UnableToBook ? "not" : string.Empty) opened for booking and contracts
+                        </span>
+                    </span>
+                </div>
+                <div class="room_image-wrapper">
+                    <img class="room_full-image" src="~/img/image_placeholder.png"/>
+                </div>
+            </div>
+            <div class="room_employees-wrapper">
+                <div class="room_employees-header">
+                    <span class="room_employees-span">Room Responsible Employees:</span>
+                    <a class="add_btn btn" asp-action="AddResponsibleEmployee" asp-controller="HotelManager"
+                        asp-route-roomId="@Model.ActiveRoom!.Id">
+                        Add Responsible Employee
+                    </a>
+                </div>
+                @if (Model.ActiveRoom!.Employees!.Count != 0)
+                {
+                    <div class="room_employees-cont">
+                        @foreach(Employee emp in Model.ActiveRoom!.Employees!)
+                        {
+                            <a class="employee_cont-wrapper" asp-action="ManagerRoomInformation" asp-controller="HotelManager"
+                                asp-route-roomId="@Model.ActiveRoom!.Id" asp-route-employeeId="@emp.Id">
+                                <div class="employee-img-cont">
+                                    <img class="employee_img-round" src="~/img/image_placeholder.png">
+                                </div>
+                                <span class="employee_name-sp">@($"{emp.FirstName} {emp.LastName}")</span>
+                                <span class="employee_type-sp">@emp.LoginInfo!.UserType!.Name</span>
+
+                                <div class="employee_salary-wrap">
+                                    <span class="emp-prop_header">Salary: </span>
+                                    @Math.Round(emp.Salary, 2) ₴
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no__items-wrapper">
+                        <img class="no__items-img" src="~/img/noEmployees.png">
+                        <span class="no__items-room-span">
+                            There are 
+                            <span class="text-highlight">no employees</span>
+                             responsible to this room. Add one!
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <div class="room_enclosures-wrapper @(isEnclosureCompatible ? string.Empty : "hidden")">
+                <div class="room_enclosures-header">
+                    <span class="room_enclosures-span">Room Enclosures:</span>
+                    <a class="add_btn btn @(isEnclosureCompatible ? string.Empty : "disabled")"
+                   asp-action="AddAnimalEnclosureToRoom" asp-controller="HotelManager" asp-route-roomId="@Model.ActiveRoom!.Id">
+                        Add Enclosure To Room
+                    </a>
+                </div>
+                @if (Model.ActiveRoom!.Enclosures!.Count != 0)
+                {
+                    <div class="enclosure_statuses-wrapper">
+                        @foreach (EnclosureStatus status in Enum.GetValues<EnclosureStatus>())
+                        {
+                            <div class="enclosure-status-cont">
+                                <div class="enclosure_status @(UtilFuncs.GetEnumDisplayName(status).ToLower())"></div>
+                                <span class="enclosure_status-name">@($"{UtilFuncs.GetEnumDisplayName(status)}")</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="room_enclosures-cont">
+                        @foreach (AnimalEnclosure enclosure in Model.ActiveRoom!.Enclosures!)
+                        {
+                            <a class="room_enclosure-cont @UtilFuncs.GetEnumDisplayName(enclosure.EnclosureStatus).ToLower()"
+                                asp-action="ManagerRoomInformation" asp-controller="HotelManager" asp-route-roomId="@Model.ActiveRoom!.Id"
+                                asp-route-enclosureId="@enclosure.Id">
+                                @enclosure.Id
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no__items-wrapper">
+                        <img class="no__items-img" src="~/img/noEnclosures.png">
+                        <span class="no__items-room-span">
+                            There are
+                            <span class="text-highlight">no enclosures</span>
+                            in this room. Add one!
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <span class="delete__error-span">
+                @roomDeleteErrorMessage
+            </span>
+            <div class="room_action-btns-wrapper">
+                <a class="action__edit action_btn" asp-action="EditRoomPage" asp-controller="HotelManager"
+               asp-route-roomId="@Model.ActiveRoom!.Id">
+                    Edit room 
+                    <img class="action_icon" src="~/img/edit-pencil.png" />
+                </a>
+                <a class="action__delete action_btn" asp-action="DeleteRoom" asp-controller="HotelManager"
+               asp-route-roomId="@Model.ActiveRoom!.Id">
+                    Delete Room
+                    <img class="action_icon" src="~/img/trash-bin.png" />
+                </a>
+            </div>
+
+            <div class="enc_room-modal modal @((Model.IsInteractedWithModal && Model.ActiveEnclosure != null) ? string.Empty : "hidden")">
+                <span class="modal__close-btn">X</span>
+            </div>
+            <div class="emp_room-modal modal @((Model.IsInteractedWithModal && Model.ActiveEmployee != null) ? string.Empty : "hidden")">
+                <span class="modal__close-btn">X</span>
+            </div>
+            <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+        </div>
+    </div>
+}

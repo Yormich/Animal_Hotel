@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -82,6 +84,20 @@ namespace Animal_Hotel
                 return cachedActions;
 
             });
+        }
+
+        public static string GetEnumDisplayName(Enum value)
+        {
+            var fieldInfo = value.GetType().GetField(value.ToString());
+
+            var nameAttribute = fieldInfo!.GetCustomAttribute<DisplayAttribute>();
+
+            if (nameAttribute != null)
+            {
+                return nameAttribute.Name!;
+            }
+
+            return value.ToString();
         }
     }
 }

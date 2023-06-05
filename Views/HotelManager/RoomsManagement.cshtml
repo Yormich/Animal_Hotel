@@ -1,5 +1,65 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model HotelManagerViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/rooms.css"/>
+}
+
+@section Main
+{
+    <div class="mnrooms_wrapper">
+        <div class="mnrooms_header-wrapper">
+            <span class="mnrooms_header text-highlight">Hotel Rooms</span>
+            <a class="add_room-btn btn" asp-action="RoomCreationPage" asp-controller="HotelManager"
+             asp-route-pageIndex="@Model.Rooms!.PageIndex">Add New Room</a>
+        </div>
+        <div class="mnrooms_cont">
+            @foreach (Room room in Model.Rooms!)
+            {
+                <div class="mnroom_cont">
+                    <div class="mroom_img-cont">
+                        <img class="mroom_img" src="~/img/image_placeholder.png">
+                    </div>
+
+                    <div class="mroom_info-cont">
+                        <span class="mroom_name">Room @room.Id</span>
+                        <span class="mroom_type">@room.RoomType!.Type</span>
+                        <div class="mroom_complex_data">
+                            <span class="mroom_av_enc">
+                                <span class="demibold">
+                                    Available Enclosures:
+                                </span> @room.AvailableEnclosuresAmount
+                            </span>
+                            <span class="mroom_resp_emp">
+                                <span class="demibold">
+                                    Responsible Employees:
+                                </span> @room.ResponsibleEmployeesCount
+                            </span>
+                        </div>
+
+                        <span class="@(room.UnableToBook ? "not_" : string.Empty)available_status">Is 
+                            @(room.UnableToBook ? "not" : string.Empty) available for bookings</span>
+                    </div>
+                    <div class="view_btn-wrapper">
+                        <a class="view_room-btn btn" asp-action="ManagerRoomInformation" asp-controller="HotelManager"
+                   asp-route-roomId="@room.Id">
+                            View Full Info
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="page__btns-wrapper">
+            <a asp-action="HotelRooms" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Rooms!.PageIndex - 1)"
+               class="page__btn btn @(Model.Rooms!.HasPreviousPage ? string.Empty : "disabled")">
+                &larr; Previous
+            </a>
+            <h3 class="page_index-header"> @Model.Rooms!.PageIndex </h3>
+            <a asp-action="HotelRooms" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Rooms!.PageIndex + 1)"
+               class="page__btn btn @(Model.Rooms!.HasNextPage ? string.Empty : "disabled")">
+                Next &rarr;
+            </a>
+        </div>
+    </div>
 }

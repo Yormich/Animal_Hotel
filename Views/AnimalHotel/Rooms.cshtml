@@ -6,9 +6,9 @@
     <link rel="stylesheet" href="/css/rooms.css">
 }
 
-<body>
+<body class="body">
     <div class="authorization-required">* You must be authorized to view enclosures</div>
-    <main>
+    <main class="main">
         <div class="rooms__wrapper">
             @foreach (Room room in Model.Rooms!)
             {
@@ -17,11 +17,12 @@
                     <div class="room__info-wrapper">
                         <h1 class="room__title">Room @room.Id</h1>
                         <span class="room__type">@(room.RoomType!.Type)</span>
-                        <h3 class="room__enclosures-amount">Number of Enclosures: @(room.Enclosures.Count)</h3>
+                        <h3 class="room__enclosures-amount">Number of available Enclosures: 
+                            @(room.AvailableEnclosuresAmount)</h3>
                         <div class="room__pricing-info">
                             <span class="pricing">
                                 Average Enclosure Price:
-                                @(room.Enclosures.Count == 0 ? 0 : Math.Ceiling(room.Enclosures.Average(e => e.PricePerDay))) ₴
+                                @(room.Enclosures!.Count == 0 ? 0 : Math.Ceiling(room.Enclosures.Average(e => e.PricePerDay))) ₴
                                 <span class="small__text-span">
                                     per day
                                 </span>
@@ -42,7 +43,7 @@
                 </section>
             }
         </div>
-        <aside>
+        <aside class="aside">
             <a asp-action="">
                 <img class="adv__img" src ="~/img/image_placeholder.png" />
             </a>

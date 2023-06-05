@@ -1,8 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Animal_Hotel.Models.DatabaseModels
 {
+    [Flags]
+    public enum EnclosureStatus
+    {
+        [Display(Name = "Available")]
+        None = 0,
+        [Display(Name = "Booked")]
+        HasBooking = 1,
+        [Display(Name = "Occupied")]
+        HasContract = 2
+    }
+
+
     [Table("animal_enclosure")]
     public class AnimalEnclosure
     {
@@ -39,9 +52,12 @@ namespace Animal_Hotel.Models.DatabaseModels
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal PricePerDay { get; set; }
 
-        public List<Booking> Bookings { get; set; } = new();
+        [NotMapped]
+        public EnclosureStatus EnclosureStatus { get; set; } = EnclosureStatus.None;
 
-        public List<Contract> Contracts { get; set; } = new();
+        public List<Booking>? Bookings { get; set; }
+
+        public List<Contract>? Contracts { get; set; }
 
         public AnimalEnclosure(short maxAnimals, short roomId, short enclosureTypeId, short animalTypeId)
         {

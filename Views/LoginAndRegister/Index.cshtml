@@ -1,0 +1,72 @@
+﻿@model HomePageViewModel;
+
+
+@{
+    int reviewAmount = Model.Reviews.Count;
+}
+
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="/css/home_page.css"/>
+    <script type="module" defer src="/js/home_page.js"></script>
+}
+
+<body>
+    <header class="header__wrapper">
+        <h1 class="header__h1">
+            When
+            <span class="text-highlight">pet care</span>
+            meets the
+            <span class="text-highlight">professionals</span>
+        </h1>
+        <h4 class="header__h4">A simpler animal hoteling for simpler life</h4>
+        <button class="txt-btn btn__learn-more">Learn more &#8595;</button>
+        <img class="header__img" src="/img/image_placeholder.png" alt="Header Image">
+    </header>
+    <section id="section--1">
+
+    </section>
+    <section id="section--2">
+        
+    </section>
+    <section class="section" id="section--3">
+        <div class="section__title-reviews">
+            <h5 class="section__reviews-s_header">To make you fully determined</h5>
+            <h2 class="section__reviews-b_header">Read <span class="text-highlight">Animal Hotel</span> last reviews.</h2>
+        </div>
+        <div class="slider">
+            @{
+                int i = 0;
+                @foreach(var review in Model.Reviews)
+                {
+                    <div class="slide slide--@(i + 1)" style="transform: translateX(@($"{100 * i}%"))">
+                        <div class="review">
+                            <div class="review__header">
+                                <div class="review__user-info">
+                                    <img class="slide__user-img" src="~/img/image_placeholder.png">
+                                    <h5 class="slide__user-name">@($"{review.Client.FirstName} {review.Client.LastName}")</h5>
+                                </div>
+                                <div class="review__rating">
+                                    @review.Rating / 10
+                                </div>
+                            </div>
+                            <div class="review__user-comment">
+                                 @($"{review.Comment}")
+                            </div>
+                        </div>
+                    </div>
+                    i++;
+                }
+            }
+            <button class="slider__btn slider__btn-left">&#8592;</button>
+            <button class="slider__btn slider__btn-right">&#8594;</button>
+            <div class="dots">
+                @for(int j = 0; j < reviewAmount; j++) 
+                {
+                    <button class="dots__dot" data-slide="@(j)"></button>
+                }
+            </div>
+        </div>
+    </section>
+</body>

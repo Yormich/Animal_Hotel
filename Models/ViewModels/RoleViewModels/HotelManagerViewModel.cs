@@ -7,7 +7,15 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
     {
         public PaginatedList<EmployeeDataViewModel>? Employees { get; set; }
 
+        public PaginatedList<Room>? Rooms { get; set; }
+
+        public Room? ActiveRoom { get; set; }
         public EmployeeDataViewModel? ActiveEmployee { get; set; }
+
+        public AnimalEnclosure? ActiveEnclosure { get; set; }
+        
+        public List<RoomType>? RoomTypes { get; set; }
+ 
 
         public EmployeeRegisterModel? NewEmployee { get; set; }
 

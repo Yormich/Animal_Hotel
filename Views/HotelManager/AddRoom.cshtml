@@ -1,5 +1,63 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model HotelManagerViewModel
+
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css" />
+    <link rel="stylesheet" href="~/css/rooms.css" />
+    <script defer type="module" src="~/js/add_room.js"> </script>
+}
+
+@section Main
+{
+    <div class="aroom_form_wrapper">
+        <div class="aroom_header-wrapper">
+            <span class="aroom_header text-highlight">Hotel Room Creation</span>
+        </div>
+        <form class="aroom_form" asp-action="CreateRoom" asp-controller="HotelManager" method="post" enctype="multipart/form-data">
+            <input asp-for="UserId" type="hidden"/>
+            <input asp-for="Login" type="hidden"/>
+            <input asp-for="PhoneNumber" type="hidden"/>
+            <input asp-for="FirstName" type="hidden"/>
+            <input asp-for="LastName" type="hidden"/>
+
+            <div class="aroom_els-wrapper">
+                    <div class="aroom_row l1">
+                        <label class="profile__form-lbl row_lbl-pos" asp-for="ActiveRoom!.RoomTypeId">Room Type</label>
+                        <select class="form__input-select row_inp-pos" asp-for="ActiveRoom!.RoomTypeId">
+                            @for (int i = 0; i < Model.RoomTypes!.Count; i++)
+                            {
+                                if (Model.ActiveRoom!.RoomTypeId == Model.RoomTypes[i].Id)
+                                {
+                                    <option value="@Model.RoomTypes[i].Id" selected>@Model.RoomTypes[i].Type</option>
+                                }
+                                else
+                                {
+                                    <option value="@Model.RoomTypes[i].Id">@Model.RoomTypes[i].Type</option>
+                                }
+                            }
+                        </select>
+                        <span class="row_vld-pos" asp-validation-for="ActiveRoom!.RoomTypeId"></span>
+                    </div>
+                    <div class="aroom_checkbox_row r1">
+                        <label class="profile__form-lbl" asp-for="ActiveRoom!.UnableToBook">Is not available for booking: </label>
+                        <input class="form_input-checkbox" type="checkbox" asp-for="ActiveRoom!.UnableToBook" />
+                    </div>
+
+                <div class="aroom_file_row">
+                    <label class="profile__form-lbl frow_lbl-pos" asp-for="ActiveRoom!.PhotoPath">Room Photo</label>
+                    <label for="photo-input" class="for_input-file form__input-file-input frow_inp-pos">
+                        Upload your photo<br />
+                        by clicking on that input<br />
+                        <span class="small__text-blue">+</span>
+                    </label>
+                    <input id="photo-input" class="form__input-file form__input" asp-for="ActiveRoom!.PhotoPath"
+                       value="@Model.ActiveRoom!.PhotoPath" type="file" accept="image/png,image/jpeg" />
+                    <span class="form__input-file-validator form_file-span frow_vld-pos" asp-validation-for="ActiveRoom!.PhotoPath"></span>
+                </div>
+            </div>
+
+            <button class="btn__submit btn" type="submit">Submit</button>
+        </form>
+    </div>
 }

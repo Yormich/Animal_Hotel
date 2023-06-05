@@ -52,17 +52,6 @@ namespace Animal_Hotel.Controllers
             return View(model);
         }
 
-        [Authorize]
-        public async Task<IActionResult> Room(int roomId)
-        {
-            if (!User.Identity!.IsAuthenticated)
-            {
-                return RedirectToAction("Rooms", new { isNotAuthorized = true });
-            }
-
-            return View("Room");
-        }
-
         public IActionResult Privacy()
         {
             return View();
