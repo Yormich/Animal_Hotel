@@ -23,5 +23,7 @@ namespace Animal_Hotel.Services
         public Task MakeEmployeeResponsibleForRoom(RoomEmployee roomEmployee);
 
         public Task RemoveEmployeeResponsibility(RoomEmployee roomEmployee);
+
+        public Task<List<Employee>> GetSuitableForRoomEmployees(short roomId);
     }
 }

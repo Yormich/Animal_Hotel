@@ -189,5 +189,28 @@ namespace Animal_Hotel.Services
 
             return _db.Database.ExecuteSqlRawAsync(sql, employeeParam, roomParam);
         }
+
+        public Task<List<Employee>> GetSuitableForRoomEmployees(short roomId)
+        {
+            string sql = "SELECT e.* FROM dbo.employee e" +
+                " INNER JOIN dbo.user_login_info uli ON uli.employee_id = e.id" +
+                " INNER JOIN dbo.user_type ut ON uli.user_type_id = ut.id" +
+                " WHERE ut.id = " +
+                " (" +
+                "   SELECT rt.preferred_user_type_id FROM dbo.room r" +
+                "   INNER JOIN dbo.room_type rt ON r.room_type_id = rt.id" +
+                "   WHERE r.id = @roomId" +
+                " ) AND e.id NOT IN " +
+                " (" +
+                "   SELECT eInner.id FROM dbo.employee eInner" +
+                "   INNER JOIN dbo.room_employee re ON re.employee_id = eInner.id" +
+                "   WHERE re.room_id = @roomId" +
+                " )" +
+                " ORDER BY e.salary";
+
+            SqlParameter roomParam = new("roomId", roomId);
+
+            return _db.Employees.FromSqlRaw(sql, roomParam).AsQueryable().ToListAsync();
+        }
     }
 }

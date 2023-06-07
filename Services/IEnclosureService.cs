@@ -14,6 +14,8 @@ namespace Animal_Hotel.Services
 
         public Task<bool> IsEnclosureHasActiveContractOrBooking(long enclosureId);
 
-        public Task UpdateEnclosure(long enclosureId);
+        public Task UpdateEnclosure(AnimalEnclosure enclosure);
+
+        public Task<List<EnclosureType>> GetEnclosureTypes();
     }
 }

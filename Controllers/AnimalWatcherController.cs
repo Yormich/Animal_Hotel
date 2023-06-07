@@ -6,14 +6,15 @@ using System.Security.Claims;
 
 namespace Animal_Hotel.Controllers
 {
-    public class HotelRoomsController : Controller
+    public class AnimalWatcherController : Controller
     {
         private readonly ClaimHelper _claimHelper;
-        public HotelRoomsController(ClaimHelper claimHelper)
+        public AnimalWatcherController(ClaimHelper claimHelper)
         {
             _claimHelper = claimHelper;
         }
 
+        [HttpGet]
         [Authorize(Roles = "AnimalWatcher")]
         [ActionMapper("GetWatcherRelatedRooms", "HotelRooms", "Your Rooms")]
         public async Task<IActionResult> GetWatcherRelatedRooms()

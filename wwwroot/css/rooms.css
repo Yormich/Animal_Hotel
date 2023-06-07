@@ -485,8 +485,20 @@ a.disabled {
   background-color: rgb(70, 183, 35);
 }
 
+.text_available {
+  color: rgb(70, 183, 35);
+}
+
+.text_booked {
+  color: rgb(239, 172, 48);
+}
+
 .booked {
   background-color: rgb(239, 172, 48);
+}
+
+.text_occupied {
+  color: rgb(225, 33, 33);
 }
 
 .occupied {
@@ -536,4 +548,80 @@ a.disabled {
 .delete__error-span {
   color: rgb(225, 33, 33);
   text-align: center;
+}
+
+.emp_room-modal {
+  width: fit-content;
+  height: fit-content;
+}
+
+.er-modal_header-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.er-modal-name {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.er-modal-img {
+  height: calc(var(--index) * 4);
+  width: calc(var(--index) * 4);
+  border-radius: 50%;
+  padding: 2px;
+  background-image: var(--gradient-primary);
+}
+
+.er-modal_els-wrapper {
+  margin: 6% 0%;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
+  column-gap: 2%;
+  width: 100%;
+  row-gap: 2%;
+}
+
+.er-modal__column {
+  grid-row: 1/4;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  row-gap: 3%;
+}
+
+.er-modal__row {
+  display: grid;
+  white-space: nowrap;
+  grid-template-rows: 1fr 1fr;
+}
+
+.er-modal__row.date {
+  display: grid;
+  grid-template-rows: 0.5fr 1fr;
+}
+
+.er_room-modal {
+  height: calc(var(--index) * 16);
+  width: fit-content;
+}
+
+.add_er-btn {
+  margin-top: 2%;
+  font-weight: 500;
+}
+
+.er_room-header {
+  font-weight: 500;
+  font-size: 2rem;
+}
+
+.er_modal-els-wrapper {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 2%;
+  margin: 8% 0%;
 }

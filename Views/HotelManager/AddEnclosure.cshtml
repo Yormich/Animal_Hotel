@@ -1,0 +1,74 @@
+﻿@model HotelManagerViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/enclosures.css" />
+    <link rel="stylesheet" href="~/css/baseforms.css" />
+}
+
+@section Main
+{
+    <div class="aenc_-wrapper">
+        <span class="aenc-header text-highlight">New Enclosure in Room @Model.ActiveRoom!.Id</span>
+        <form class="aenc_form" asp-action="AddEnclosure" asp-controller="HotelManager" method="post">
+            <input asp-for="Login" type="hidden"/>
+            <input asp-for="PhoneNumber" type="hidden"/>
+            <input asp-for="FirstName" type="hidden"/>
+            <input asp-for="LastName" type="hidden"/>
+ 
+            <input asp-for="ActiveRoom!.Id" type="hidden"/>
+
+            <div class="aenc-els-wrapper">
+                <div class="aenc_column l1">
+                    <div class="aenc_row">
+                        <label class="profile__form-lbl" asp-for="ActiveRoom!.Id">Room Number</label>
+                        <input class="form__input-num" asp-for="ActiveRoom!.Id" type="number" readonly/>
+                    </div>
+                    <div class="aenc_row">
+                        <label class="profile__form-lbl" asp-for="ActiveEnclosure!.AnimalTypeId">Animal Type</label>
+                        <select class="form__input-select" asp-for="ActiveEnclosure!.AnimalTypeId">
+                            @foreach(AnimalType animalType in Model.AnimalTypes!)
+                            {
+                                if (Model.ActiveEnclosure!.AnimalTypeId == animalType.Id) 
+                                {
+                                    <option value="@animalType.Id" selected>@animalType.Name - @Math.Round(animalType.BasePrice, 2) per day</option>
+                                }
+                                else
+                                {
+                                    <option value="@animalType.Id">@animalType.Name - @Math.Round(animalType.BasePrice, 2) per day</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="aenc_column r1">
+                    <div class="aenc_row">
+                        <label class="profile__form-lbl" asp-for="ActiveEnclosure!.MaxAnimals">Max Animals Amount</label>
+                        <input class="form__input-num" type="number" asp-for="ActiveEnclosure!.MaxAnimals" min="1" max="10" step="1"/>
+                        <span asp-validation-for="ActiveEnclosure!.MaxAnimals"></span>
+                    </div>
+                    <div class="aenc_row">
+                        <label class="profile__form-lbl" asp-for="ActiveEnclosure!.EnclosureTypeId">Enclosure Type</label>
+                        <select class="form__input-select" asp-for="ActiveEnclosure!.EnclosureTypeId">
+                            @foreach(EnclosureType encType in Model.EnclosureTypes!)
+                            {
+                                if(Model.ActiveEnclosure!.EnclosureTypeId == encType.Id)
+                                {
+                                    <option value="@encType.Id" selected>@encType.Name - @Math.Round(encType.Surcharge, 2) surcharge</option>
+                                }
+                                else
+                                {
+                                    <option value="@encType.Id">@encType.Name - @Math.Round(encType.Surcharge, 2) surcharge</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <span class="price_calc-span">*Price will be calculated based on type of animals and enclosure type surcharge</span>
+            <button class="aenc_btn btn">Add Enclosure</button>
+        </form>
+    </div>
+}

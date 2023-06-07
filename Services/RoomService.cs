@@ -28,7 +28,6 @@ namespace Animal_Hotel.Services
             if (count == null)
             {
                 count = await (withClosedToBook ? _db.Rooms : _db.Rooms.Where(r => !r.UnableToBook)).CountAsync();
-                Console.WriteLine(count);
                 _cache.Set($"GetRoomsCountAsync", count,
                     new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(20)));
             }
@@ -180,6 +179,7 @@ namespace Animal_Hotel.Services
                 .ThenInclude(e => e.LoginInfo)
                 .ThenInclude(e => e!.UserType)
                 .Include(r => r.Enclosures)
+                .AsQueryable()
                 .FirstAsync();
 
             var enclosuresStatuses = await _enclosureService.GetEnclosuresStatus(roomId);
@@ -197,6 +197,7 @@ namespace Animal_Hotel.Services
 
             return _db.Rooms.FromSqlRaw(sql, roomParam)
                 .Include(r => r.RoomType)
+                .AsQueryable()
                 .FirstAsync();
         }
 

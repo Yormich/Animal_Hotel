@@ -21,6 +21,14 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
 
         public List<RequestStatus>? RequestStatuses { get; set; }
 
+        public List<Employee>? SuitableEmployees { get; set; }
+
+        public RoomEmployee? NewRoomEmployee { get; set; }
+
+        public List<AnimalType>? AnimalTypes { get; set; }
+
+        public List<EnclosureType>? EnclosureTypes { get; set; }
+
         public HotelManagerViewModel(UserViewModel user) : base(user)
         {
         }

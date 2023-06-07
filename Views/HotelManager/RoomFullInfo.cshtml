@@ -3,6 +3,7 @@
 @{
     bool isEnclosureCompatible = Model.ActiveRoom!.RoomType!.Id == 1;
     string? roomDeleteErrorMessage = TempData["roomDeleteErrorMessage"] as string;
+    string? enclosureErrorMessage = TempData["enclosureErrorMessage"] as string;
 }
 
 
@@ -41,8 +42,8 @@
             <div class="room_employees-wrapper">
                 <div class="room_employees-header">
                     <span class="room_employees-span">Room Responsible Employees:</span>
-                    <a class="add_btn btn" asp-action="AddResponsibleEmployee" asp-controller="HotelManager"
-                        asp-route-roomId="@Model.ActiveRoom!.Id">
+                    <a class="add_btn btn" asp-action="ManagerRoomInformation" asp-controller="HotelManager"
+                        asp-route-roomId="@Model.ActiveRoom!.Id" asp-route-isAddingEmployee="@true">
                         Add Responsible Employee
                     </a>
                 </div>
@@ -104,7 +105,7 @@
                         {
                             <a class="room_enclosure-cont @UtilFuncs.GetEnumDisplayName(enclosure.EnclosureStatus).ToLower()"
                                 asp-action="ManagerRoomInformation" asp-controller="HotelManager" asp-route-roomId="@Model.ActiveRoom!.Id"
-                                asp-route-enclosureId="@enclosure.Id">
+                                asp-route-enclosureId="@enclosure.Id" asp-route-status="@enclosure.EnclosureStatus">
                                 @enclosure.Id
                             </a>
                         }
@@ -138,13 +139,156 @@
                     <img class="action_icon" src="~/img/trash-bin.png" />
                 </a>
             </div>
+            @if (Model.ActiveEnclosure != null)
+            {
+                <div class="enc_room-modal modal @((Model.IsInteractedWithModal && Model.ActiveEnclosure != null) ? string.Empty : "hidden")">
+                    <span class="modal__close-btn">X</span>
+                    <span class="enr_modal-header text-highlight">
+                        Enclosure @Model.ActiveEnclosure!.Id
+                    </span>
 
-            <div class="enc_room-modal modal @((Model.IsInteractedWithModal && Model.ActiveEnclosure != null) ? string.Empty : "hidden")">
-                <span class="modal__close-btn">X</span>
-            </div>
-            <div class="emp_room-modal modal @((Model.IsInteractedWithModal && Model.ActiveEmployee != null) ? string.Empty : "hidden")">
-                <span class="modal__close-btn">X</span>
-            </div>
+                    <div class="enr_modal-els-wrapper">
+                        <div class="enr__column l1">
+                            <div class="enr__row">
+                                <label class="profile__form-lbl">Price Per Day</label>
+                                <input class="form__input-num" value="@Math.Round(Model.ActiveEnclosure!.PricePerDay, 2)" readonly>
+                            </div>
+                            <div class="enr__row">
+                                <label class="profile__form-lbl">Enclosure Type</label>
+                                <select class="form__input-select">
+                                    <option value="@Model.ActiveEnclosure!.Id" selected>@Model.ActiveEnclosure!.EnclosureType!.Name</option>
+                                </select>
+                            </div>
+                            <div class="enr__row">
+                                <label class="profile__form-lbl">Status: </label>
+                                <span class="enclosure_status-name text_@(UtilFuncs.GetEnumDisplayName(Model.ActiveEnclosure!.EnclosureStatus)
+                                .ToLower())" >@($"{UtilFuncs.GetEnumDisplayName(Model.ActiveEnclosure!.EnclosureStatus)}")</span>
+                            </div>
+                        </div>
+                        <div class="enr__column r1">
+                            <div class="enr__row">
+                                <label class="profile__form-lbl">Max Animals</label>
+                                <input class="form__input-num" type="number" value="@Model.ActiveEnclosure!.MaxAnimals" readonly>
+                            </div>
+                            <div class="enr__row">
+                                <label class="profile__form-lbl">Animal Type</label>
+                                <select class=form__input-select>
+                                    <option value="@Model.ActiveEnclosure!.AnimalTypeId" selected>@Model.ActiveEnclosure!.AnimalType!.Name</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <span class="delete_edit_error-span">@enclosureErrorMessage</span>
+                    <div class="modal__btns-wrapper">
+                        <a class="action__edit action_btn" asp-action="EditEnclosurePage" asp-controller="HotelManager"
+                   asp-route-enclosureId="@Model.ActiveEnclosure!.Id" asp-route-status="@Model.ActiveEnclosure!.EnclosureStatus"
+                        asp-route-roomId="@Model.ActiveRoom!.Id">
+                            Edit Enclosure
+                        </a>
+                        <a class="action__delete action_btn" asp-action="RemoveEnclosure" asp-controller="HotelManager"
+                   asp-route-enclosureId="@Model.ActiveEnclosure!.Id" asp-route-status="@Model.ActiveEnclosure!.EnclosureStatus"
+                            asp-route-roomId="@Model.ActiveRoom!.Id">
+                            Delete Enclosure  
+                            <img class="action_icon" src="~/img/trash-bin.png">
+                        </a>
+                    </div>
+                </div>
+            }
+            @if (Model.ActiveEmployee != null)
+            {
+                <div class="emp_room-modal modal @((Model.IsInteractedWithModal) ? string.Empty : "hidden")">
+                    <span class="modal__close-btn">X</span>
+
+                    <div class="er-modal_header-wrapper">
+                        <span class="er-modal-name text-highlight">@($"{Model.ActiveEmployee!.FirstName} {Model.ActiveEmployee!.LastName}")</span>
+                        <img class="er-modal-img" src="~/img/image_placeholder.png" />
+                    </div>
+
+                    <div class="er-modal_els-wrapper">
+                        <div class="er-modal__column l1">
+                            <div class="er-modal__row">
+                                <label class="profile__form-lbl">Email</label>
+                                <input class="form__input-txt" value="@Model.ActiveEmployee!.Login" readonly />
+                            </div>
+                            <div class="er-modal__row">
+                                <label class="profile__form-lbl">Salary</label>
+                                <input class="form__input-num" asp-for="ActiveEmployee!.Salary" type="number" readonly/>
+                            </div>
+                            <div class="er-modal__row date">
+                                <label class="profile__form-lbl">Birth Date</label>
+                                <input class="form__input-date" value="@(UtilFuncs.DateToHtmlFormatter(Model.ActiveEmployee!.BirthDate))"
+                                       type="date" readonly />
+                            </div>
+                        </div>
+                        <div class="er-modal__column r1">
+                            <div class="er-modal__row">
+                                <label class="profile__form-lbl">Phone Number</label>
+                                <input class="form__input-txt" value="@Model.ActiveEmployee!.PhoneNumber" />
+                            </div>
+                            <div class="er-modal__row">
+                                <label class="profile__form-lbl">Sex</label>
+                                <select class="form__input-select readonly">
+                                    <option selected>@Model.ActiveEmployee!.Sex</option>
+                                </select>
+                            </div>
+                            <div class="er-modal__row date">
+                                <label class="profile__form-lbl">Hired Since</label>
+                                <input class="form__input-date" value="@(UtilFuncs.DateToHtmlFormatter(Model.ActiveEmployee!.HiredSince))"
+                                       type="date" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal__btns-wrapper">
+                        <a class="action__delete action_btn" asp-action="RemoveEmployeeFromRoom" asp-controller="HotelManager"
+                   asp-route-roomId="@Model.ActiveRoom!.Id" asp-route-employeeId="@Model.ActiveEmployee!.SubUserId">
+                            Remove Employee from room
+                            <img class="action_icon" src="~/img/trash-bin.png" />
+                        </a>
+                    </div>
+                </div>
+            }
+            @if (Model.SuitableEmployees != null && Model.NewRoomEmployee != null && Model.SuitableEmployees.Count != 0)
+            {
+                <div class="er_room-modal modal @(Model.IsInteractedWithModal ? string.Empty : "hidden")">
+                    <span class="modal__close-btn">X</span>
+                    <span class="er_room-header text-highlight">Employee Adding</span>
+                    <form asp-action="AddResponsibleEmployee" asp-controller="HotelManager" method="post">
+                        <input asp-for="ActiveRoom!.Id" type="hidden">
+
+
+                        <div class="er_modal-els-wrapper">
+                            <div class="er-modal__row l1">
+                                <label class="profile__form-lbl" asp-for="NewRoomEmployee!.RoomId">Room Number</label>
+                                <input class="form__input-num" type="number" asp-for="NewRoomEmployee!.RoomId" 
+                                   value="@Model.ActiveRoom!.Id" readonly>
+                            </div>
+                            <div class="er-modal__row r1">
+                                <label class="profile__form-lbl" asp-for="NewRoomEmployee!.EmployeeId">Employee</label>
+                                <select class="form__input-select" asp-for="NewRoomEmployee!.EmployeeId">
+                                    @for(int i = 0; i < Model.SuitableEmployees.Count; i++)
+                                    {
+                                        @if (i == 0)
+                                        {
+                                            <option value="@Model.SuitableEmployees[i].Id" selected>
+                                                @($"{Model.SuitableEmployees[i].FirstName} {Model.SuitableEmployees[i].LastName}. Salary: {Math.Round(Model.SuitableEmployees[i].Salary, 2)}")
+                                            </option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@Model.SuitableEmployees[i].Id">
+                                                @($"{Model.SuitableEmployees[i].FirstName} {Model.SuitableEmployees[i].LastName}. Salary: {Math.Round(Model.SuitableEmployees[i].Salary, 2)}")
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <button class="add_er-btn btn" type="submit">Add Employee</button>
+                    </form>
+                </div>
+            }
             <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
         </div>
     </div>

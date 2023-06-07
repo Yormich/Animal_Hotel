@@ -205,7 +205,6 @@ namespace Animal_Hotel.Services
                 " SET password = CONVERT(VARBINARY, @password)" +
                 "WHERE id = @userId";
 
-            Console.WriteLine("In method " + password);
             SqlParameter passwordParam = new SqlParameter("password", System.Data.SqlDbType.VarChar);
             passwordParam.Value = password;
             SqlParameter idParam = new SqlParameter("userId", userId);

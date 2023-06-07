@@ -23,7 +23,7 @@ namespace Animal_Hotel.Models.DatabaseModels
         public long Id { get; set; }
 
         [Required]
-        [Range(0, 10)]
+        [Range(1, 10)]
         [Column("max_animals")]
         public short MaxAnimals { get; set; }
 
@@ -66,5 +66,7 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.EnclosureTypeId = enclosureTypeId;
             this.AnimalTypeId = animalTypeId;
         }
+
+        public AnimalEnclosure() { }
     }
 }

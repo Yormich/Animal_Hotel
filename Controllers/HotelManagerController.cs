@@ -21,10 +21,11 @@ namespace Animal_Hotel.Controllers
         private readonly IRequestService _requestService;
         private readonly IRoomService _roomService;
         private readonly IEnclosureService _enclosureService;
+        private readonly IAnimalService _animalService;
 
         public HotelManagerController(ClaimHelper claimHelper, IUserTypeService userTypeService, IMemoryCache memoryCache,
             IEmployeeService employeeService, IUserLoginInfoService userSerice, IIFileProvider fileProvider,
-            IRequestService requestService, IRoomService roomService, IEnclosureService enclosureService)
+            IRequestService requestService, IRoomService roomService, IEnclosureService enclosureService, IAnimalService animalService)
         {
             _claimHelper = claimHelper;
             _userTypeService = userTypeService;
@@ -35,6 +36,7 @@ namespace Animal_Hotel.Controllers
             _requestService = requestService;
             _roomService = roomService;
             _enclosureService = enclosureService;
+            _animalService = animalService;
         }
 
         [HttpGet]
@@ -163,7 +165,8 @@ namespace Animal_Hotel.Controllers
 
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
-        public async Task<IActionResult> ManagerRoomInformation(short roomId, long? enclosureId, long? employeeId)
+        public async Task<IActionResult> ManagerRoomInformation(short roomId, long? enclosureId, EnclosureStatus? status, 
+            long? employeeId, bool? isAddingEmployee)
         {
             HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
             {
@@ -174,12 +177,20 @@ namespace Animal_Hotel.Controllers
             {
                 manager.IsInteractedWithModal = true;
                 manager.ActiveEnclosure = await _enclosureService.GetEnclosureById(enclosureId);
+                manager.ActiveEnclosure!.EnclosureStatus = status ?? EnclosureStatus.None;
             }
 
             if (employeeId != null)
             {
                 manager.IsInteractedWithModal = true;
                 manager.ActiveEmployee = await _employeeService.GetEmployeeById(employeeId);
+            }
+
+            if (isAddingEmployee ?? false)
+            {
+                manager.IsInteractedWithModal = true;
+                manager.SuitableEmployees = await _employeeService.GetSuitableForRoomEmployees(roomId);
+                manager.NewRoomEmployee = new();
             }
 
             return View("RoomFullInfo", manager);
@@ -279,18 +290,118 @@ namespace Animal_Hotel.Controllers
             return RedirectToAction("ManagerRoomInformation", new {roomId = model.ActiveRoom!.Id});
         }
 
+        [HttpPost]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> AddResponsibleEmployee(HotelManagerViewModel manager)
+        {
+            await _employeeService.MakeEmployeeResponsibleForRoom(manager.NewRoomEmployee!);
+            return RedirectToAction("ManagerRoomInformation", new { roomId = manager.ActiveRoom!.Id });
+        }
+
+
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
-        public async Task<IActionResult> AddResponsibleEmployee(short roomId)
+        public async Task<IActionResult> RemoveEmployeeFromRoom(long employeeId, short roomId)
         {
-            throw new NotImplementedException();
+            await _employeeService.RemoveEmployeeResponsibility(new() { EmployeeId = employeeId, RoomId = roomId });
+            return RedirectToAction("ManagerRoomInformation", new { roomId });
         }
 
         [HttpGet]
         [Authorize(Roles = "HotelManager")]
         public async Task<IActionResult> AddAnimalEnclosureToRoom(short roomId)
         {
-            throw new NotImplementedException();
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveRoom = new() { Id = roomId },
+                AnimalTypes = new(await _animalService.GetAnimalTypes()),
+                EnclosureTypes = await _enclosureService.GetEnclosureTypes(),
+                ActiveEnclosure = new(),
+            };
+
+            return View("AddEnclosure", manager);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> AddEnclosure(HotelManagerViewModel model)
+        {
+            AnimalEnclosure enclosure = model.ActiveEnclosure!;
+            if (!ModelState.IsValid)
+            {
+                model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+                {
+                    ActiveEnclosure = enclosure,
+                    AnimalTypes = new(await _animalService.GetAnimalTypes()),
+                    EnclosureTypes = new(await _enclosureService.GetEnclosureTypes()),
+                };
+
+                return View("AddEnclosure", model);
+            }
+
+            enclosure.RoomId = model.ActiveRoom!.Id;
+            await _enclosureService.CreateEnclosure(enclosure);
+
+            return RedirectToAction("ManagerRoomInformation", new { roomId = model.ActiveRoom!.Id});
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> RemoveEnclosure(long enclosureId, short roomId, EnclosureStatus status)
+        {
+            if (await _enclosureService.IsEnclosureHasActiveContractOrBooking(enclosureId))
+            {
+                TempData["enclosureErrorMessage"] = "You can't delete enclosure while it is booked or has active contract";
+                return RedirectToAction("ManagerRoomInformation", new { roomId , enclosureId, status});
+            }
+
+            await _enclosureService.DeleteEnclosure(enclosureId);
+
+            return RedirectToAction("ManagerRoomInformation", new { roomId});
+        }
+
+        [HttpGet]
+        [Authorize(Roles ="HotelManager")]
+        public async Task<IActionResult> EditEnclosurePage(long enclosureId, short roomId, EnclosureStatus status)
+        {
+            if (await _enclosureService.IsEnclosureHasActiveContractOrBooking(enclosureId))
+            {
+                TempData["enclosureErrorMessage"] = "You can't edit enclosure while it is booked or has active contract";
+                return RedirectToAction("ManagerRoomInformation", new { roomId, enclosureId, status });
+            }
+
+            HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveEnclosure = await _enclosureService.GetEnclosureById(enclosureId),
+                AnimalTypes = new(await _animalService.GetAnimalTypes()),
+                EnclosureTypes = await _enclosureService.GetEnclosureTypes(),
+                ActiveRoom = new() { Id = roomId},
+            };
+
+            return View("EditEnclosure", manager);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "HotelManager")]
+        public async Task<IActionResult> UpdateEnclosure(HotelManagerViewModel model)
+        {
+            AnimalEnclosure enclosure = model.ActiveEnclosure!;
+            if (!ModelState.IsValid)
+            {
+                model = await (GetManagerForEnclosures(model.ActiveRoom!.Id, enclosure.Id));
+                return View("EditEnclosure", model);
+            }
+
+            if (await _enclosureService.IsEnclosureHasActiveContractOrBooking(enclosure.Id))
+            {
+                TempData["enclosureEditErr"] = "Enclosure already has booking or active contract, please try again later";
+                model = await (GetManagerForEnclosures(model.ActiveRoom!.Id, enclosure.Id));
+                return View("EditEnclosure", model);
+            }
+
+            await _enclosureService.UpdateEnclosure(enclosure);
+
+            return RedirectToAction("ManagerRoomInformation", new { roomId = model.ActiveRoom!.Id });
         }
 
         [HttpGet]
@@ -409,5 +520,16 @@ namespace Animal_Hotel.Controllers
                 ModelState.AddModelError("NewEmployee.PhoneNumber", checkResult.errorMessage);
             }
         }
+
+        private async Task<HotelManagerViewModel> GetManagerForEnclosures(short roomId, long enclosureId)
+        {
+            return new HotelManagerViewModel(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveEnclosure = await _enclosureService.GetEnclosureById(enclosureId),
+                AnimalTypes = new(await _animalService.GetAnimalTypes()),
+                EnclosureTypes = await _enclosureService.GetEnclosureTypes(),
+                ActiveRoom = new() { Id = roomId },
+            };
+        } 
     }
 }
