@@ -4,6 +4,7 @@ using Animal_Hotel.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 
@@ -234,7 +235,14 @@ namespace Animal_Hotel.Controllers
                 return View("AddReview", model);
             }
 
-            await _reviewService.CreateReview(clientReview);
+            var procedureRes = await _reviewService.CreateReview(clientReview);
+
+            if (!procedureRes.Item1)
+            {
+                model.HotelReview = clientReview;
+                TempData["addReviewErr"] = procedureRes.message;
+                return View("AddReview", model);
+            }
 
             return RedirectToAction("ClientReview");
         }

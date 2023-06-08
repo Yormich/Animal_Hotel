@@ -12,12 +12,12 @@ namespace Animal_Hotel.Models.DatabaseModels
         [Required]
         [Column("first_name")]
         [StringLength(maximumLength: 50, MinimumLength = 2, ErrorMessage = "First name length should be between 2 and 50 characters")]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required]
         [Column("last_name")]
         [StringLength(maximumLength: 50, MinimumLength = 2, ErrorMessage = "Last name length should be between 2 and 50 characters")]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         [Required]
         [Column("birth_date")]
@@ -33,10 +33,14 @@ namespace Animal_Hotel.Models.DatabaseModels
         [StringLength(maximumLength:40, MinimumLength = 5, ErrorMessage = "Photo path length should be between 5 and 40 characters")]
         public string? PhotoPath { get; set; }
 
+        [Column("registered_since")]
+        [DataType(DataType.Date)]
+        public DateTime RegisteredSince { get; set; }
+
         public Review? Review { get; set; }
         public UserLoginInfo? LoginInfo { get; set; }
 
-        public List<Animal> Animals { get; set; } = new();
+        public List<Animal>? Animals { get; set; }
 
         public Client(string firstName, string lastName, DateTime birthDate, string? cardNumber = null, string? photoPath = null)
         {
@@ -46,5 +50,7 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.CardNumber = cardNumber;
             this.PhotoPath = photoPath;
         }
+
+        public Client() { }
     }
 }

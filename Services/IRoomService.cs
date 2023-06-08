@@ -12,18 +12,16 @@ namespace Animal_Hotel.Services
 
         public Task<List<Room>> GetManagerRoomsByPageIndex(int pageIndex, int pageSize, bool withClosedToBook = true);
 
-        public Task<bool> IsRoomHasAnyActiveContractsOrBookings(short roomId);
-
-        public Task UpdateRoom(Room updatedRoom);
+        public Task<(bool success, string? message)> UpdateRoom(Room updatedRoom);
 
         public Task<short> CreateRoom(Room newRoom);
 
+        public Task UpdateRoomPhoto(short roomId, string photoPath);
+
         public Task<Room> GetManagerRoomInfo(short roomId);
 
-        public Task RemoveRoom(short roomId);
+        public Task<(bool success, string? message)> RemoveRoom(short roomId);
 
         public Task<List<RoomType>> GetRoomTypes();
-
-        public Task RemoveNotPreferrableEmployees(short roomId);
     }
 }

@@ -18,17 +18,30 @@ namespace Animal_Hotel.Services
             _cache = memoryCache;
         }
 
-        public Task CreateReview(Review review)
+        public async Task<(bool, string? message)> CreateReview(Review review)
         {
-            string sql = "INSERT INTO dbo.client_review(rating, comment, writing_date, client_id) VALUES" +
-                "(@rating, @comment, CONVERT(DATETIME, @writingDate), @clientId)";
+            string sql = "EXEC dbo.CreateReview" +
+                        "   @rating = @Rating, " +
+                        "   @comment = @Comment," +
+                        "   @writing_date = @writingDate," +
+                        "   @client_id = @clientId;";
 
-            SqlParameter ratingParam = new("rating", review.Rating);
-            SqlParameter commentParam = new("comment", review.Comment);
+            SqlParameter ratingParam = new("Rating", review.Rating);
+            SqlParameter commentParam = new("Comment", review.Comment);
             SqlParameter dateParam = new("writingDate", DateTime.Now);
             SqlParameter clientParam = new("clientId", review.ClientId);
 
-            return _db.Database.ExecuteSqlRawAsync(sql, ratingParam, commentParam, dateParam, clientParam);
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(sql, ratingParam, commentParam, dateParam, clientParam);
+            }
+            catch(SqlException se)
+            {
+                Console.WriteLine(se.Message);
+                return new(false, se.Message);
+            }
+
+            return new(true, string.Empty);
         }
 
         public Task DeleteReview(long reviewId)
@@ -60,7 +73,7 @@ namespace Animal_Hotel.Services
                 " WHERE id = @reviewId";
 
             SqlParameter idParam = new("reviewId", review.Id);
-            SqlParameter dateParam = new("writingDate", review.WritingDate);
+            SqlParameter dateParam = new("writingDate", DateTime.Now);
             SqlParameter commentParam = new("comment", review.Comment);
             SqlParameter ratingParam = new("rating", review.Rating);
 

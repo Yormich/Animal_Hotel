@@ -182,7 +182,8 @@ namespace Animal_Hotel.Controllers
         private async Task CheckUserUniqueData(UserViewModel model)
         {
             //because in profile we can update only phone number, we passing empty string in email to verificate only phone number
-            var userDataCheckResult = await _userLoginService.IsUserWithPhoneAndEmailExists(string.Empty, model.PhoneNumber);
+            var userDataCheckResult = await _userLoginService.IsUserWithPhoneAndEmailExists(string.Empty, model.PhoneNumber,
+                model.UserId);
 
             if (userDataCheckResult.isExists)
             {

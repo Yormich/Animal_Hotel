@@ -257,18 +257,26 @@ namespace Animal_Hotel.Controllers
             Room updatedRoom = model.ActiveRoom!;
             var files = HttpContext.Request.Form.Files;
 
+            var result = await _roomService.UpdateRoom(updatedRoom);
+
+            if (!result.success)
+            {
+                TempData["editRoomErr"] = result.message;
+                ModelState.AddModelError("ActiveRoom.RoomTypeId", result.message!);
+            }
+
             if (files.Any())
             {
                 var file = files[0];
                 if (_fileProvider.IsFileExtensionSupported(file.FileName) && ModelState.IsValid)
                 {
                     await _fileProvider.RemoveFileFromServer($"room_{updatedRoom.Id}_{file!.FileName}");
-                    updatedRoom.PhotoPath = file.FileName;
+                    await _roomService.UpdateRoomPhoto(updatedRoom.Id, file!.FileName);
                     await _fileProvider.UploadFileToServer(file, $"room_{updatedRoom.Id}_{file!.FileName}");
                 }
                 else
                 {
-                    ModelState.AddModelError("NewEmployee.PhotoPath", "This file extension is not supported");
+                    ModelState.AddModelError("ActiveRoom.PhotoPath", "This file extension is not supported");
                 }
             }
 
@@ -282,10 +290,6 @@ namespace Animal_Hotel.Controllers
 
                 return View("EditRoom", model);
             }
-
-            //TODO: transaction
-            await _roomService.UpdateRoom(updatedRoom);
-            await _roomService.RemoveNotPreferrableEmployees(updatedRoom.Id);
 
             return RedirectToAction("ManagerRoomInformation", new {roomId = model.ActiveRoom!.Id});
         }
@@ -349,13 +353,13 @@ namespace Animal_Hotel.Controllers
         [Authorize(Roles = "HotelManager")]
         public async Task<IActionResult> RemoveEnclosure(long enclosureId, short roomId, EnclosureStatus status)
         {
-            if (await _enclosureService.IsEnclosureHasActiveContractOrBooking(enclosureId))
+            var queryResult = await _enclosureService.DeleteEnclosure(enclosureId);
+
+            if (!queryResult.success)
             {
-                TempData["enclosureErrorMessage"] = "You can't delete enclosure while it is booked or has active contract";
+                TempData["enclosureErrorMessage"] = queryResult.message;
                 return RedirectToAction("ManagerRoomInformation", new { roomId , enclosureId, status});
             }
-
-            await _enclosureService.DeleteEnclosure(enclosureId);
 
             return RedirectToAction("ManagerRoomInformation", new { roomId});
         }
@@ -364,12 +368,6 @@ namespace Animal_Hotel.Controllers
         [Authorize(Roles ="HotelManager")]
         public async Task<IActionResult> EditEnclosurePage(long enclosureId, short roomId, EnclosureStatus status)
         {
-            if (await _enclosureService.IsEnclosureHasActiveContractOrBooking(enclosureId))
-            {
-                TempData["enclosureErrorMessage"] = "You can't edit enclosure while it is booked or has active contract";
-                return RedirectToAction("ManagerRoomInformation", new { roomId, enclosureId, status });
-            }
-
             HotelManagerViewModel manager = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
             {
                 ActiveEnclosure = await _enclosureService.GetEnclosureById(enclosureId),
@@ -392,14 +390,14 @@ namespace Animal_Hotel.Controllers
                 return View("EditEnclosure", model);
             }
 
-            if (await _enclosureService.IsEnclosureHasActiveContractOrBooking(enclosure.Id))
+            var queryResult = await _enclosureService.UpdateEnclosure(enclosure);
+
+            if (!queryResult.success)
             {
-                TempData["enclosureEditErr"] = "Enclosure already has booking or active contract, please try again later";
+                TempData["enclosureEditErr"] = queryResult.message;
                 model = await (GetManagerForEnclosures(model.ActiveRoom!.Id, enclosure.Id));
                 return View("EditEnclosure", model);
             }
-
-            await _enclosureService.UpdateEnclosure(enclosure);
 
             return RedirectToAction("ManagerRoomInformation", new { roomId = model.ActiveRoom!.Id });
         }
@@ -408,14 +406,13 @@ namespace Animal_Hotel.Controllers
         [Authorize(Roles = "HotelManager")]
         public async Task<IActionResult> DeleteRoom(short roomId)
         {
-            if (await _roomService.IsRoomHasAnyActiveContractsOrBookings(roomId))
-            {
-                TempData["roomDeleteErrorMessage"] = "You can't delete room until there is any booking or active contract." +
-                    " Try to to make room unable to be booked and wait till booking and contracts expire.";
+            var queryResult = await _roomService.RemoveRoom(roomId);
 
+            if (!queryResult.success)
+            {
+                TempData["roomDeleteErrorMessage"] = queryResult.message;
                 return RedirectToAction("ManagerRoomInformation", new { roomId });
             }
-            await _roomService.RemoveRoom(roomId);
 
             return RedirectToAction("HotelRooms");
         }

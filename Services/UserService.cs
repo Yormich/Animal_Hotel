@@ -41,33 +41,23 @@ namespace Animal_Hotel.Services
                 .SingleOrDefaultAsync();
         }
 
-        public Task<ClientDataViewModel?> GetClientDataById(long loginId)
+        public async Task<ClientDataViewModel?> GetClientDataById(long loginId)
         {
-            string sql = "SELECT * FROM dbo.user_login_info uli" +
-                " WHERE uli.id = @id";
+            string sql = "SELECT * FROM dbo.client_info ci" +
+                " WHERE ci.user_id = @id";
 
             SqlParameter idParam = new SqlParameter("id", loginId);
 
-            var clientTask = _db.LoginInfos.FromSqlRaw(sql, idParam)
-                .Include(uli => uli.Client)
+            var client = await _db.ClientViewModels.FromSqlRaw(sql, idParam)
                 .Include(uli => uli.UserType)
-                .Select(uli => new ClientDataViewModel()
-                {
-                    UserId = uli.Id,
-                    Login = uli.Email,
-                    UserPassword = new StringBuilder().GetString(uli.Password),
-                    PhoneNumber = uli.PhoneNumber,
-                    SubUserId = uli.Client!.Id,
-                    FirstName = uli.Client!.FirstName,
-                    LastName = uli.Client.LastName,
-                    BirthDate = uli.Client!.BirthDate,
-                    CardNumber = uli.Client!.CardNumber ?? string.Empty,
-                    PhotoPath = uli.Client.PhotoPath ?? "UnsetClient.png",
-                    UserType = uli.UserType,
-                })
                 .FirstOrDefaultAsync();
 
-            return clientTask;
+            if (client != null)
+            {
+                client.UserPassword = new StringBuilder().GetString(client!.Password!);
+            }
+
+            return client;
         }
 
         public Task<string?> GetUserPhotoPathById(long userId)
@@ -90,33 +80,23 @@ namespace Animal_Hotel.Services
             return loginInfos.Select(uli => isClient ? uli.Client!.PhotoPath : uli.Employee!.PhotoPath).FirstAsync();
         }
 
-        public Task<EmployeeDataViewModel?> GetEmployeeDataById(long loginId)
+        public async Task<EmployeeDataViewModel?> GetEmployeeDataById(long loginId)
         {
-            string sql = "SELECT * FROM dbo.user_login_info uli" +
-                " WHERE uli.id = @id";
+            string sql = "SELECT * FROM dbo.employee_info ei" +
+                " WHERE ei.user_id = @id";
 
             SqlParameter idParam = new SqlParameter("id", loginId);
 
-            var employeeTask = _db.LoginInfos.FromSqlRaw(sql, idParam)
-                .Include(uli => uli.Employee)
+            var employee = await _db.EmployeeViewModels.FromSqlRaw(sql, idParam)
                 .Include(uli => uli.UserType)
-                .Select(uli => new EmployeeDataViewModel()
-                {
-                    UserId = uli.Id,
-                    Login = uli.Email,
-                    UserPassword = new StringBuilder().GetString(uli.Password),
-                    PhoneNumber = uli.PhoneNumber,
-                    SubUserId = uli.Employee!.Id,
-                    FirstName = uli.Employee!.FirstName,
-                    LastName = uli.Employee!.LastName,
-                    BirthDate = uli.Employee!.BirthDate,
-                    Salary = uli.Employee!.Salary,
-                    Sex = uli.Employee!.Sex,
-                    PhotoPath = uli.Employee!.PhotoPath,
-                    UserType = uli.UserType,
-                })
                 .FirstOrDefaultAsync();
-            return employeeTask;
+
+            if (employee != null)
+            {
+                employee.UserPassword = new StringBuilder().GetString(employee!.Password!);
+            }
+
+            return employee;
         }
 
         public Task<IQueryable<UserLoginInfo>> GetUserLoginsWithTypes()
@@ -212,16 +192,17 @@ namespace Animal_Hotel.Services
             await _db.Database.ExecuteSqlRawAsync(sql, passwordParam, idParam);
         }
 
-        public async Task<(bool isExists, string errorMessage)> IsUserWithPhoneAndEmailExists(string email, string phone)
+        public async Task<(bool isExists, string errorMessage)> IsUserWithPhoneAndEmailExists(string email, string phone, long? requester = null)
         {
             (bool IsExists, string errorMessage) result = (false, string.Empty);
             string sql = "SELECT * FROM dbo.user_login_info uli" +
-                " WHERE uli.login = @email OR uli.phone_number = @phoneNumber";
+                " WHERE uli.id <> @requester AND (uli.login = @email OR uli.phone_number = @phoneNumber)";
 
             SqlParameter emailParam = new("email", email);
             SqlParameter phoneParam = new("phoneNumber", phone);
+            SqlParameter reqParam = new("requester", requester);
 
-            if (await _db.LoginInfos.FromSqlRaw(sql, emailParam, phoneParam).AsQueryable().AnyAsync())
+            if (await _db.LoginInfos.FromSqlRaw(sql, emailParam, phoneParam, reqParam).AsQueryable().AnyAsync())
             {
                 result = (true, "User with such email or phone number already exists");
             }

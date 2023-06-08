@@ -16,7 +16,7 @@ namespace Animal_Hotel.Services
 
         public Task UpdatePasswordById(long userId, string password);
 
-        public Task<(bool isExists, string errorMessage)> IsUserWithPhoneAndEmailExists(string email, string phone);
+        public Task<(bool isExists, string errorMessage)> IsUserWithPhoneAndEmailExists(string email, string phone, long? requester = null);
 
         //TODO: split this methods across services
         public Task<bool> UpdateClient(ClientDataViewModel clientViewModel);

@@ -41,6 +41,12 @@
                     </div>
 
                     <div class="client-form__row">
+                        <label class="form__lbl-position profile__form-lbl" asp-for="RegisteredSince">Registered Since</label>
+                        <input class="form__input-position form__input-date" type="date" asp-for="RegisteredSince"
+                            value="@(UtilFuncs.DateToHtmlFormatter(Model.RegisteredSince))" readonly/>
+                    </div>
+
+                    <div class="client-form__row">
                         <label class="form__lbl-position profile__form-lbl" asp-for="PhotoPath">Your Photo</label>
                         <label for="photo-input" class="for_input-file form__input-file-input form_file-position">
                             @Model.PhotoPath

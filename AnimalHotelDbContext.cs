@@ -5,6 +5,8 @@ using Animal_Hotel.Models.DatabaseModels;
 using Animal_Hotel.Models.ModelConfigurations;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
+using Animal_Hotel.Models.ViewModels.RoleViewModels;
+using Animal_Hotel.Models.ViewModels;
 
 namespace Animal_Hotel
 {
@@ -45,6 +47,13 @@ namespace Animal_Hotel
         public DbSet<Booking> Bookings { get; set; }
 
         public DbSet<Contract> Contracts { get; set; }
+
+        //view models
+        public DbSet<ClientDataViewModel> ClientViewModels { get; set; }
+
+        public DbSet<EmployeeDataViewModel> EmployeeViewModels { get; set; }
+
+        public DbSet<EnclosureStatusViewModel> EnclosuresStatuses { get; set; }
 
         public AnimalHotelDbContext(IDbConnectionProvider provider, IHttpContextAccessor accessor) : base() 
         {
@@ -112,6 +121,15 @@ namespace Animal_Hotel
 
             //Contract
             modelBuilder.ApplyConfiguration(new ContractConfiguration());
+
+            //Enclosures Statuses
+            ConfigureEnclosureStatuses(modelBuilder.Entity<EnclosureStatusViewModel>());
+
+            //Client Data view model
+            ConfigureClientViewModel(modelBuilder.Entity<ClientDataViewModel>());
+
+            //Employee Data view model
+            ConfigureEmployeeViewModel(modelBuilder.Entity<EmployeeDataViewModel>());
         }
 
 
@@ -172,6 +190,27 @@ namespace Animal_Hotel
                 .WithOne(a => a.Booking)
                 .HasForeignKey<Booking>(b => b.AnimalId)
                 .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        private static void ConfigureEnclosureStatuses(EntityTypeBuilder<EnclosureStatusViewModel> esBuilder)
+        {
+            esBuilder.HasNoKey();
+
+            esBuilder.ToView("enclosures_statuses");
+        }
+
+        private static void ConfigureClientViewModel(EntityTypeBuilder<ClientDataViewModel> cdvBuilder)
+        {
+            cdvBuilder.HasNoKey();
+
+            cdvBuilder.ToView("client_info");
+        }
+
+        private static void ConfigureEmployeeViewModel(EntityTypeBuilder<EmployeeDataViewModel> emvBuilder)
+        {
+            emvBuilder.HasNoKey();
+
+            emvBuilder.ToView("employee_info");
         }
     }
 }

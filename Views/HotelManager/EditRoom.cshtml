@@ -9,7 +9,7 @@
 }
 
 @{
-    bool roomHasContractOrBooking = await roomService.IsRoomHasAnyActiveContractsOrBookings(Model.ActiveRoom!.Id);
+    string? errorMessage = TempData["editRoomErr"] as string;
 }
 
 @section Main
@@ -31,7 +31,7 @@
             <div class="aroom_els-wrapper">
                 <div class="aroom_row l1">
                     <label class="profile__form-lbl row_lbl-pos" asp-for="ActiveRoom!.RoomTypeId">Room Type</label>
-                    <select class="form__input-select row_inp-pos @(roomHasContractOrBooking ? "sreadonly" : string.Empty)" 
+                    <select class="form__input-select row_inp-pos" 
                         asp-for="ActiveRoom!.RoomTypeId">
                         @for (int i = 0; i < Model.RoomTypes!.Count; i++)
                         {
@@ -46,8 +46,7 @@
                         }
                     </select>
                     <span class="row_vld-pos" asp-validation-for="ActiveRoom!.RoomTypeId">
-                        @(roomHasContractOrBooking ? "You can not change room type while it has any active contract or booking" : 
-                        "All employees with not preferrable position will not be responsible for room anymore after room type change")
+                        @(errorMessage)
                     </span>
                 </div>
                 <div class="aroom_checkbox_row r1">

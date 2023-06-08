@@ -8,6 +8,10 @@
     <script defer src="~/js/review.js" type="module"></script>
 }
 
+@{
+    string? errorMessage = TempData["addReviewErr"] as string;
+}
+
 @section Main
 {
     <div class="client__review-wrapper">
@@ -22,7 +26,7 @@
 
             <input asp-for="HotelReview!.ClientId" type="hidden">
 
-
+            <span class="delete_edit_error-span">@errorMessage</span>
             <div class="review__user-info-wrapper">
                 <div class="user_main-info-wrapper">
                     <img class="review__user-img" src="~/img/image_placeholder.png">

@@ -32,9 +32,10 @@
 
 .client__review-form {
   margin-top: 1%;
+  margin-bottom: 2%;
   align-self: center;
   width: 80%;
-  height: calc(var(--index) * 20);
+  height: calc(var(--index) * 26);
   padding: calc(var(--index));
   box-shadow: 1px 1px 4px var(--color-dark);
   border-radius: calc(var(--index));
@@ -132,6 +133,7 @@
   margin-top: 2%;
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: flex-end;
 }
 
@@ -182,4 +184,5 @@
 
 .btn__submit {
   transition: all 0.5s;
+  margin-top: 0%;
 }

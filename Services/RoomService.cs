@@ -1,4 +1,5 @@
 ﻿using Animal_Hotel.Models.DatabaseModels;
+using Animal_Hotel.Models.ViewModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -91,18 +92,28 @@ namespace Animal_Hotel.Services
             });
         }
 
-        public Task UpdateRoom(Room updatedRoom)
+        public async Task<(bool success, string? message)> UpdateRoom(Room updatedRoom)
         {
-            string sql = "UPDATE dbo.room" +
-                " SET room_type_id = @roomType, photo_name = @photoName, unable_to_book = @isUnableToBook" +
-                " WHERE id = @roomId";
+            string sql = "EXEC dbo.UpdateRoom" +
+                "   @room_id = @roomId," +
+                "   @room_type_id = @roomType," +
+                "    @unable_to_book = @isUnableToBook;";
 
             SqlParameter idParam = new("roomId", updatedRoom.Id);
             SqlParameter typeParam = new("roomType", updatedRoom.RoomTypeId);
-            SqlParameter photoParam = new("photoName", updatedRoom.PhotoPath);
             SqlParameter isUnableToBookParam = new("isUnableToBook", updatedRoom.UnableToBook);
 
-            return _db.Database.ExecuteSqlRawAsync(sql, idParam, typeParam, photoParam, isUnableToBookParam);
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(sql, idParam, typeParam, isUnableToBookParam);
+            }
+            catch (SqlException se)
+            {
+                Console.WriteLine(se.Message);
+                return new(false, se.Message);
+            }
+
+            return new(true, string.Empty);
         }
 
         public async Task<short> CreateRoom(Room newRoom)
@@ -112,14 +123,23 @@ namespace Animal_Hotel.Services
             return newRoom.Id;
         }
 
-        public Task RemoveRoom(short roomId)
+        public async Task<(bool success, string? message)> RemoveRoom(short roomId)
         {
-            string sql = "DELETE FROM dbo.room" +
-                " WHERE id = @roomId";
+            string sql = "EXEC dbo.DeleteRoom" +
+                "    @roomId = @Room;";
 
-            SqlParameter idParam = new SqlParameter("roomId", roomId);
+            SqlParameter idParam = new SqlParameter("Room", roomId);
 
-            return _db.Database.ExecuteSqlRawAsync(sql, idParam);
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(sql, idParam);
+            }
+            catch(SqlException se)
+            {
+                Console.WriteLine(se.Message);
+                return new(false, se.Message);
+            }
+            return new(true, string.Empty);
         }
 
         private IQueryable<Employee> GetResponsibleForRoomEmployees(short roomId)
@@ -137,31 +157,11 @@ namespace Animal_Hotel.Services
         private IQueryable<AnimalEnclosure> GetAvailableEnclosuresForRoom(short roomId)
         {
             string sql = "SELECT ae.* FROM dbo.animal_enclosure ae" +
-                " INNER JOIN dbo.room r ON r.id = ae.room_id" +
-                " WHERE r.id = @roomId AND ae.id NOT IN " +
-                "(" +
-                "    SELECT DISTINCT aeInner.id FROM animal_enclosure aeInner" +
-                "    LEFT JOIN dbo.booking b ON b.enclosure_id = aeInner.id" +
-                "    LEFT JOIN dbo.contract c ON c.enclosure_id = aeInner.id" +
-                "    WHERE aeInner.room_id = @roomId AND (b.enclosure_id IS NOT NULL OR (c.id IS NOT NULL AND c.check_out_date IS NULL))" +
-                ")";
+                " WHERE ae.room_id = @roomId AND ae.id NOT IN (SELECT aeInner.id FROM dbo.occupied_enclosures aeInner)";
 
             SqlParameter roomParam = new("roomId", roomId);
 
             return _db.Enclosures.FromSqlRaw(sql, roomParam).AsQueryable();
-        }
-
-        public Task<bool> IsRoomHasAnyActiveContractsOrBookings(short roomId)
-        {
-            string sql = "SELECT DISTINCT ae.* FROM dbo.room r" +
-                " INNER JOIN dbo.animal_enclosure ae ON ae.room_id = r.id" +
-                " LEFT JOIN dbo.booking b ON b.enclosure_id = ae.id" +
-                " LEFT JOIN dbo.contract c ON c.enclosure_id = ae.id" +
-                " WHERE r.id = @roomId AND (b.enclosure_id IS NOT NULL OR (c.id IS NOT NULL AND c.check_out_date IS NULL))";
-
-            SqlParameter roomParam = new("roomId", roomId);
-
-            return _db.Rooms.FromSqlRaw(sql, roomParam).AnyAsync();
         }
 
         public Task<List<RoomType>> GetRoomTypes()
@@ -202,7 +202,7 @@ namespace Animal_Hotel.Services
         }
 
         private Task SetEnclosuresStatuses(List<AnimalEnclosure> enclosures,
-             List<(long enclosureId, bool hasActiveBookings, bool hasActiveContracts)> enclosuresStatuses)
+             List<EnclosureStatusViewModel> enclosuresStatuses)
         {
             return Task.Run(() =>
             {
@@ -210,7 +210,7 @@ namespace Animal_Hotel.Services
 
                 for (int i = 0; i < enclosuresSorted.Count; i++)
                 {
-                    bool hasContract = enclosuresStatuses[i].hasActiveContracts, hasBooking = enclosuresStatuses[i].hasActiveBookings;
+                    bool hasContract = enclosuresStatuses[i].HasActiveContracts, hasBooking = enclosuresStatuses[i].HasBookings;
 
                     enclosuresSorted[i].EnclosureStatus = Enum.Parse<EnclosureStatus>(Math.Max(Convert.ToInt32(hasBooking) * 1,
                         Convert.ToInt32(hasContract) * 2).ToString());
@@ -218,23 +218,16 @@ namespace Animal_Hotel.Services
             });
         }
 
-        public Task RemoveNotPreferrableEmployees(short roomId)
+        public Task UpdateRoomPhoto(short roomId, string photoPath)
         {
-            string sql = "DELETE FROM dbo.room_employee" +
-                " WHERE room_id = @roomId AND employee_id IN" +
-                " (" +
-                "   SELECT DISTINCT e.id FROM dbo.employee e" +
-                "   INNER JOIN dbo.user_login_info uli ON uli.employee_id = e.id" +
-                "   INNER JOIN dbo.user_type ut ON ut.id = uli.user_type_id" +
-                "   INNER JOIN dbo.room_employee re ON re.employee_id = e.id" +
-                "   INNER JOIN dbo.room r ON r.id = re.room_id" +
-                "   INNER JOIN dbo.room_type rt ON r.room_type_id = rt.id" +
-                "   WHERE room_id = @roomId AND ut.id <> rt.preferred_user_type_id" +
-                " )";
+            string sql = "UPDATE dbo.room" +
+                " SET photo_name = @photoPath" +
+                " WHERE id = @roomId";
 
             SqlParameter roomParam = new("roomId", roomId);
+            SqlParameter photoParam = new("photoPath", photoPath);
 
-            return _db.Database.ExecuteSqlRawAsync(sql, roomParam);
+            return _db.Database.ExecuteSqlRawAsync(sql, roomParam, photoParam);
         }
     }
 }

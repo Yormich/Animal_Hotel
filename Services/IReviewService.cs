@@ -12,6 +12,6 @@ namespace Animal_Hotel.Services
 
         public Task UpdateReview(Review review);
 
-        public Task CreateReview(Review review);
+        public Task<(bool, string? message)> CreateReview(Review review);
     }
 }
