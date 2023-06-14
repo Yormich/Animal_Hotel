@@ -1,0 +1,85 @@
+﻿@model ReceptionistViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/contracts.css"/>
+}
+
+@{
+    string? bErrorMessage = TempData["noBookingError"] as string;
+    string? caErrorMessage = TempData["aContractError"] as string;
+}
+
+@section Main
+{
+    <div class="acontract-wrapper">
+        <div class="contract-header-wrapper">
+            <span class="contract-header-span text-highlight">Contract Creation</span>
+        </div>
+        <form class="ac-form" asp-action="ConfirmContractCreation" asp-controller="Receptionist" method="post">
+            <input asp-for="Login" type="hidden" />
+            <input asp-for="FirstName" type="hidden" />
+            <input asp-for="LastName" type="hidden" />
+            <input asp-for="PhoneNumber" type="hidden" />
+            <input asp-for="UserId" type="hidden" />
+            
+            <input asp-for="ActiveContract!.AnimalId" type="hidden"/>
+            <span class="no_animals-error">@caErrorMessage</span>
+            <div class="ac-form-els-wrapper">
+                <div class="ac_column l1">
+                    <div class="ac_row">
+                        <label class="profile__form-lbl" asp-for="ActiveContract!.AnimalId">Animal</label>
+                        <input class="form__input-txt" value="@Model.ActiveAnimal!.Name - @Model.ActiveAnimal!.AnimalType!.Name" readonly/>
+                    </div>
+                    <div class="ac_row-date">
+                        <label class="profile__form-lbl" asp-for="ActiveContract!.StartDate">Start Date</label>
+                        <input class="form__input-date" asp-for="ActiveContract!.StartDate" type="datetime-local"/>
+                        <span asp-validation-for="ActiveContract!.StartDate"></span>
+                    </div>
+                </div>
+                <div class="ac_column r1">
+                    <div class="ac_row">
+                        <label class="profile__form-lbl" asp-for="ActiveContract!.EnclosureId">Selected Enclosure:</label>
+                        
+                        @if(Model.Enclosures != null && Model.Enclosures!.Count != 0)
+                        {
+                            <select class="form__input-select" asp-for="ActiveContract!.EnclosureId">
+                                @foreach(AnimalEnclosure enclosure in Model.Enclosures!)
+                                {
+                                    if (enclosure.Id == Model.ActiveContract!.EnclosureId)
+                                    {
+                                        <option value="@enclosure.Id" selected>Enclosure @enclosure.Id. @enclosure.EnclosureType!.Name. Price per Day: @Math.Ceiling(enclosure.PricePerDay). Room @enclosure.RoomId</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@enclosure.Id">Enclosure @enclosure.Id. @enclosure.EnclosureType!.Name. Price per Day: @enclosure.PricePerDay. Room @enclosure.RoomId</option>
+                                    }
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <span class="no_animals-error">There are no available enclosures for this animal</span>
+                        }
+                        <span asp-validation-for="ActiveContract!.EnclosureId"></span>
+                    </div>
+                    <div class="ac_row-date">
+                        <label class="profile__form-lbl" asp-for="ActiveContract!.EndDate">Leaving Date</label>
+                        <input class="form__input-date" asp-for="ActiveContract!.EndDate" type="datetime-local"/>
+                        <span asp-validation-for="ActiveContract!.EndDate"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ac-form-btns-wrapper">
+                <button class="add_contract btn">Create Contract</button>
+                <span class="no_animals-error">@bErrorMessage</span>
+                <a class="from_booking-btn btn" asp-action="FillContractByBooking" asp-controller="Receptionist"
+                    asp-route-animalId="@Model.SelectedAnimalId">
+                    Fill Data from booking
+                </a>
+            </div>
+        </form>
+    </div>
+}

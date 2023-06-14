@@ -25,6 +25,20 @@ namespace Animal_Hotel.Models.ViewModels.RoleViewModels
         [NotMapped]
         public bool HasFinishedContracts { get; set; }
 
+        [NotMapped]
+        public Booking? ActiveBooking { get; set; }
+
+        [NotMapped]
+        public PaginatedList<Booking>? Bookings { get; set; }
+
+
+        [NotMapped]
+        public Room? ActiveRoom { get; set; }
+
+        [NotMapped]
+        public AnimalEnclosure? ActiveEnclosure { get; set; }
+
+
         [Column("registered_since")]
         public DateTime RegisteredSince { get; set; }
 

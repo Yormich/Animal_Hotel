@@ -46,18 +46,30 @@ namespace Animal_Hotel.Services
 
             return _db.Animals.FromSqlRaw(sql, animalParam)
                 .Include(a => a.AnimalType)
+                .Include(a => a.Owner)
+                .ThenInclude(c => c!.LoginInfo)
                 .AsQueryable()
                 .FirstOrDefaultAsync();
         }
 
-        public Task DeleteAnimalById(long animalId)
+        public async Task<(bool success, string? message)> DeleteAnimalById(long animalId)
         {
-            string sql = "DELETE FROM dbo.animal" +
-                " WHERE id = @animalId";
+            string sql = "EXEC dbo.DeleteAnimal" +
+                "   @animal_id = @animalId;";
 
             SqlParameter idParam = new("animalId", animalId);
 
-            return _db.Database.ExecuteSqlRawAsync(sql, idParam);
+            try
+            {
+                await _db.Database.ExecuteSqlRawAsync(sql, idParam);
+            }
+            catch(SqlException se)
+            {
+                Console.WriteLine(se.Message);
+                return new(false, se.Message);
+            }
+
+            return new(true, string.Empty);
         }
 
         public Task UpdateAnimal(Animal animal)
@@ -82,23 +94,6 @@ namespace Animal_Hotel.Services
             await _db.SaveChangesAsync();
 
             return animal.Id;
-        }
-
-        public Task<bool> AnimalHasActiveContractOrBooking(long animalId)
-        {
-            string sql = "SELECT DISTINCT a.* FROM dbo.animal a\r\nINNER JOIN dbo.contract c ON c.animal_id = a.id" +
-                " WHERE a.id = @animalId AND (c.check_out_date IS NULL OR a.id IN " +
-                "(" +
-                "   SELECT aInner.id FROM dbo.animal aInner" +
-                "   INNER JOIN dbo.booking b ON b.animal_id = aInner.id" +
-                "   WHERE aInner.id = @animalId" +
-                "))";
-
-            SqlParameter animalIdParam = new("animalId", animalId);
-
-            return _db.Animals.FromSqlRaw(sql, animalIdParam)
-                .AsQueryable()
-                .AnyAsync();
         }
 
         public Task<IQueryable<AnimalType>> GetAnimalTypes()
@@ -126,6 +121,62 @@ namespace Animal_Hotel.Services
             SqlParameter clientParam = new("clientId", clientId);
 
             return _db.Animals.FromSqlRaw(sql, clientParam).CountAsync();
+        }
+
+        public Task<List<Animal>> GetAnimalsByWatcherId(long watcherId)
+        {
+            string sql = "SELECT DISTINCT a.* FROM dbo.animal a" +
+                " INNER JOIN dbo.contract c ON c.animal_id = a.id" +
+                " INNER JOIN dbo.animal_enclosure ae ON ae.id = c.enclosure_id" +
+                " INNER JOIN dbo.room r ON r.id = ae.room_id" +
+                " INNER JOIN dbo.room_employee re ON re.room_id = r.id"  +
+                " INNER JOIN dbo.employee e ON e.id = re.employee_id" +
+                " WHERE e.id = @employeeId AND c.check_out_date IS NULL";
+
+            SqlParameter watcherParam = new("employeeId", watcherId);
+
+            return _db.Animals.FromSqlRaw(sql, watcherParam)
+                .Include(a => a.AnimalType)
+                .Include(a => a.Owner)
+                .AsQueryable()
+                .ToListAsync();
+        }
+
+        public Task<List<Animal>> GetSuitableAnimals(long enclosureId, long clientId)
+        {
+            string sql = " SELECT a.* FROM dbo.animal a" +
+                " INNER JOIN dbo.animal_type at ON at.id = a.type_id" +
+                " WHERE a.owner_id = @clientId AND at.id = " +
+                " (" +
+                "   SELECT atInner.id FROM dbo.animal_enclosure ae" +
+                "   INNER JOIN dbo.animal_type atInner ON atInner.id = ae.animal_type_id" +
+                "   WHERE ae.id = @enclosureId" +
+                " )";
+
+            SqlParameter enclosureParam = new("enclosureId", enclosureId);
+            SqlParameter clientParam = new("clientId", clientId);
+
+            return _db.Animals.FromSqlRaw(sql, enclosureParam, clientParam)
+                .Include(a => a.AnimalType)
+                .ToListAsync();
+        }
+
+        public Task<List<Animal>> GetAvailableClientAnimals(long clientId)
+        {
+            string sql = "SELECT a.* FROM dbo.animal a " +
+                " WHERE a.owner_id = @clientId AND a.id NOT IN " +
+                " (" +
+                "   SELECT DISTINCT aInner.id FROM dbo.animal aInner" +
+                "   INNER JOIN dbo.contract c ON c.animal_id = aInner.id" +
+                "   WHERE aInner.owner_id = 1 AND  c.check_out_date IS NULL" +
+                " )";
+
+            SqlParameter clientParam = new("clientId", clientId);
+
+            return _db.Animals.FromSqlRaw(sql, clientParam)
+                .Include(a => a.AnimalType)
+                .AsQueryable()
+                .ToListAsync();
         }
     }
 }

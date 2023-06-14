@@ -1,0 +1,57 @@
+﻿@model ReceptionistViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/contracts.css"/>
+}
+
+@{
+    long? clientId = Model.Animals?.FirstOrDefault()?.OwnerId ?? 0L;
+}
+
+@section Main
+{
+    <div class="contract-animal-wrapper">
+        <div class="contract-animal-header">
+            <span class="contract-animal-span text-highlight">Client Available Animals</span>
+        </div>
+        <form class="ac-form" asp-action="ContractCreation" asp-controller="Receptionist" method="get">
+            <input asp-for="Login" type="hidden" />
+            <input asp-for="FirstName" type="hidden" />
+            <input asp-for="LastName" type="hidden" />
+            <input asp-for="PhoneNumber" type="hidden" />
+            <input asp-for="UserId" type="hidden" />
+
+
+            <div class="as-form_els-wrapper">
+                <label asp-for="SelectedAnimalId" class="profile__form-lbl">Selected Animal:</label>
+                @if (Model.Animals != null && Model.Animals!.Count != 0)
+                {
+                    <select class="form__input-select" asp-for="SelectedAnimalId">
+
+                        @foreach (Animal animal in Model.Animals!)
+                        {
+                            if (animal.Id == Model.SelectedAnimalId)
+                            {
+                                <option value="@animal.Id" selected>@animal.Name - @(animal.AnimalType!.Name). Base Price - @Math.Ceiling(animal.AnimalType!.BasePrice) ₴</option>
+                            }
+                            else
+                            {
+                                <option value="@animal.Id">@animal.Name - @(animal.AnimalType!.Name). Base Price - @Math.Ceiling(animal.AnimalType!.BasePrice) ₴</option>
+                            }
+                        }
+                    </select>
+                }
+                else
+                {
+                    <input asp-for="SelectedAnimalId" type="hidden" value="0" />
+                    <span class="no_animals-error">You don't have any available animals for contract creation</span>
+                }
+                <span asp-validation-for="SelectedAnimalId"></span>
+            </div>
+
+            <button class="btn-select btn" type="submit">Confirm</button>
+        </form>
+    </div>
+}

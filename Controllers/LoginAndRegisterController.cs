@@ -23,9 +23,11 @@ namespace Animal_Hotel.Controllers
         private readonly IIFileProvider _fileProvider;
         private readonly IReviewService _reviewService;
         private readonly IRoomService _roomService;
+        private readonly IImagePathProvider _pathProvider;
 
         public LoginAndRegisterController(IUserLoginInfoService userLoginsRepository, IClientService clientService,
-            IConfiguration configuration, IIFileProvider fileProvider, IReviewService reviewService, IRoomService roomService)
+            IConfiguration configuration, IIFileProvider fileProvider, IReviewService reviewService, IRoomService roomService,
+            IImagePathProvider pathProvider)
         {
             _configuration = configuration;
             _userLoginInfoRepository = userLoginsRepository;
@@ -33,6 +35,7 @@ namespace Animal_Hotel.Controllers
             _reviewService = reviewService;
             _roomService = roomService;
             _clientService = clientService;
+            _pathProvider = pathProvider;
         }
 
         [HttpGet("Register")]
@@ -69,7 +72,7 @@ namespace Animal_Hotel.Controllers
                 if (_fileProvider.IsFileExtensionSupported(file.FileName))
                 {
                     model.PhotoPath = file.FileName;
-                    await _fileProvider.UploadFileToServer(file, $"{model.Login}_{file.FileName}");
+                    await _fileProvider.UploadFileToServer(file, _pathProvider.BuildUserFileName(model.Login, file!.FileName));
                 }
                 else
                 {

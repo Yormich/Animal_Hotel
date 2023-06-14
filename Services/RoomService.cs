@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 #pragma warning disable IDE0090
 
 namespace Animal_Hotel.Services
@@ -13,13 +14,17 @@ namespace Animal_Hotel.Services
         private readonly AnimalHotelDbContext _db;
         private readonly IMemoryCache _cache;
         private readonly IEnclosureService _enclosureService;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IDbConnectionProvider _connectionProvider;
 
-
-        public RoomService(AnimalHotelDbContext db, IMemoryCache cache, IEnclosureService enclosureService)
+        public RoomService(AnimalHotelDbContext db, IMemoryCache cache, IEnclosureService enclosureService, 
+            IHttpContextAccessor contextAccessor, IDbConnectionProvider connectionProvider)
         {
             _db = db;
             _cache = cache;
             _enclosureService = enclosureService;
+            _contextAccessor = contextAccessor;
+            _connectionProvider = connectionProvider;
         }
 
         public async Task<int> GetRoomsCountAsync(bool withClosedToBook = false)
@@ -65,7 +70,7 @@ namespace Animal_Hotel.Services
 
         public async Task<List<Room>> GetManagerRoomsByPageIndex(int pageIndex, int pageSize, bool withClosedToBook = true)
         {
-            string sql = "SELECT * FROM dbo.room r " +
+            string sql = "SELECT r.* FROM dbo.room r " +
                 (withClosedToBook ? string.Empty : " WHERE r.unable_to_book = 0 ") +
                 " ORDER BY r.id" +
                 " OFFSET @skipAmount ROWS" +
@@ -189,6 +194,27 @@ namespace Animal_Hotel.Services
             return room;
         }
 
+        public async Task<Room> GetClientRoomInfo(short roomId)
+        {
+            string sql = "SELECT r.* FROM dbo.room r" +
+                " WHERE r.id = @roomId";
+
+            SqlParameter roomParam = new("roomId", roomId);
+
+            Room room = await _db.Rooms.FromSqlRaw(sql, roomParam)
+                .Include(r => r.RoomType)
+                .Include(r => r.Enclosures)
+                .AsQueryable()
+                .FirstAsync();
+
+            var enclosuresStatuses = await _enclosureService.GetEnclosuresStatus(roomId);
+
+            await SetEnclosuresStatuses(room.Enclosures!, enclosuresStatuses);
+
+            return room;
+
+        }
+
         public Task<Room> GetRoomBaseInfoById(short roomId)
         {
             string sql = "SELECT * FROM dbo.room r" +
@@ -228,6 +254,56 @@ namespace Animal_Hotel.Services
             SqlParameter photoParam = new("photoPath", photoPath);
 
             return _db.Database.ExecuteSqlRawAsync(sql, roomParam, photoParam);
+        }
+
+        public async Task<List<Room>> GetRoomsWithFreeEnclosuresCount(long watcherId)
+        {
+            string connectionString = _connectionProvider.GetConnection(_contextAccessor.HttpContext);
+            string sql = "SELECT r.*, (SELECT COUNT(ae.id) FROM dbo.animal_enclosure ae" +
+                " WHERE ae.room_id = r.id AND ae.id NOT IN (SELECT aeInner.id FROM dbo.occupied_enclosures aeInner))" +
+                " AS available_enclosures FROM dbo.employee e" +
+                " INNER JOIN dbo.room_employee re ON re.employee_id = e.id" +
+                " INNER JOIN dbo.room r ON r.id = re.room_id" +
+                " WHERE e.id = @employeeId";
+
+            List<Room> rooms = new();
+            using (SqlConnection sqlConnection = new(connectionString))
+            {
+                SqlCommand command = new(sql, sqlConnection);
+
+                command.Parameters.AddWithValue("@employeeId", watcherId);
+                try
+                {
+                    await sqlConnection.OpenAsync();
+
+                    SqlDataReader reader = await command.ExecuteReaderAsync();
+
+                    while (reader.Read())
+                    {
+                        short roomId = reader.GetInt16(0);
+                        short roomTypeId = reader.GetInt16(1);
+                        string photoName = reader.GetString(2);
+                        bool unableToBook = reader.GetBoolean(3);
+                        int availableCount = reader.GetInt32(4);
+
+                        rooms.Add(new Room()
+                        {
+                            Id = roomId,
+                            RoomTypeId = roomTypeId,
+                            RoomType = await _db.RoomTypes.FirstAsync(r => r.Id == roomTypeId),
+                            PhotoPath = photoName,
+                            UnableToBook = unableToBook,
+                            AvailableEnclosuresAmount = availableCount
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Server Error: " + ex.Message);
+                }
+            }
+
+            return rooms;
         }
     }
 }

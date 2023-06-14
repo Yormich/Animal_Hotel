@@ -1,0 +1,20 @@
+﻿@model ReceptionistViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/contracts.css"/>
+}
+
+@section Main
+{
+    <div class="ccontract-wrapper">
+        <div class="contract-header-wrapper">
+            <span class="contract-header-span text-highlight">Contract Closing</span>
+        </div>
+
+        <form asp-action="CloseContract" asp-controller="Receptionist" method="post">
+
+        </for>
+    </div>
+}

@@ -32,7 +32,7 @@
                             <img class="animal__photo" src="~/img/image_placeholder.png">@*TODO: rewrite image*@
                             <div class="card__info-container">
                                 <span class="animal__name">@animal.Name</span>
-                                <span class="animal__type">@animal.AnimalType.Name</span>
+                                <span class="animal__type">@animal.AnimalType!.Name</span>
                                 <div class="acard__row">
                                     <div class="acard__column">
                                         <span class="attr__name">Age: </span>
@@ -63,7 +63,7 @@
                         <button class="modal__close-btn">X</button>
 
                         <div class="amodal_header-wrapper">
-                            <span class="amodal_header text-highlight">Your @(Model.ActiveAnimal!.AnimalType.Name)</span>
+                            <span class="amodal_header text-highlight">@(Model.ActiveAnimal!.AnimalType!.Name)</span>
                             <div class="modal_animal_image-cont">
                                 <img class="modal_animal_image" src="~/img/image_placeholder.png" alt="Modal Animal Image">
                             </div>

@@ -1,0 +1,88 @@
+﻿@model ReceptionistViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/bookings.css" />
+    <link rel="stylesheet" href="~/css/contracts.css"/>
+}
+
+@{
+    string? errorMessage = TempData["cDeleteError"] as string;
+}
+
+@section Main
+{
+    <div class="contracts-wrapper">
+        <div class="bookings-header">
+            <span class="bookings-header-span text-highlight">Contracts Amount - @Model.BaseReports!.Count</span>
+            <div class="search_by_date">
+                <form class="search_els_wrapper" asp-action="GetContracts" asp-controller="Receptionist" method="get">
+                    <input class="form__input-date" asp-for="TargetDate" type="datetime-local" va/>
+                    <button class="search_btn btn" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.BaseReports!.Count != 0)
+        {
+            <div class="bookings_cont">
+                <span class="abook-error-span">@errorMessage</span>
+                @foreach (ReceptionistReport contractR in Model.BaseReports!)
+                {
+                    <div class="booking_cont">
+                        <div class="booking_info-cont">
+                            <div class="booking_header">
+                                Contract for @contractR.Animal!.AnimalType!.Name @contractR.Animal!.Name
+                            </div>
+                            <div class="rent_period">
+                                Renting Period: Start Date - <span class="bperiod">@contractR.StartDate</span>
+                                Period: @contractR.Period days
+                            </div>
+                            <div class="client_enc-info">
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Owner Name:
+                                        <span class="prop__value">
+                                            @contractR.ClientName
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Owner Phone:
+                                    </span>
+                                    <span class="prop__value">
+                                        @contractR.ClientPhone
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="booking_btns-cont">
+                            <a class="action__edit action_btn" asp-action="CheckoutDateView" asp-controller="Receptionist"
+                                asp-route-contractId="@contractR.ContractId">
+                                Close Contract
+                                <img class="action_icon" src="~/img/trash-bin.png">
+                            </a>
+                            <a class="action__delete action_btn" asp-action="DeleteContract" asp-controller="Receptionist" 
+                                asp-route-contractId="@contractR.ContractId" 
+                                asp-route-targetOffset="@(((DateTimeOffset)Model.TargetDate).ToUnixTimeSeconds())">
+                                Delete Contract
+                                <img class="action_icon" src="~/img/trash-bin.png">
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no_bookings-wrapper">
+                <img class="no_bookings-img" src="~/img/SadCat.png" alt="No Animals image">
+                <div class="no_bookings-title">
+                    There are no <span class="text-highlight">contracts</span> for this date. Check your
+                    <span class="text-highlight">target date</span>.
+                </div>
+            </div>
+        }
+    </div>
+}

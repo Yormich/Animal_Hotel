@@ -1,0 +1,79 @@
+﻿@model ClientDataViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/bookings.css"/>
+}
+
+@section Main
+{
+    <div class="bookings-wrapper">
+        <div class="bookings-header">
+            <span class="bookings-header-span text-highlight">Your Bookings</span>
+            <a class="new_book-btn btn" asp-action="Rooms" asp-controller="AnimalHotel">Create New Booking</a>
+        </div>
+        @if (Model.Bookings!.Count != 0)
+        {
+            <div class="bookings_cont">
+                @foreach (Booking booking in Model.Bookings!)
+                {
+                    <div class="booking_cont">
+                        <div class="booking_info-cont">
+                            <div class="booking_header">
+                                Booking for @booking.Animal!.AnimalType!.Name @booking.Animal!.Name
+                            </div>
+                            <div class="rent_period">
+                                Renting Period: <span class="bperiod">@booking.StartDate - @booking.EndDate</span>
+                            </div>
+                            <div class="booking_enc-info">
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Enclosure Location:
+                                        <span class="prop__value">
+                                            Room @booking.Enclosure!.RoomId, Enclosure @booking.EnclosureId
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Price Per Day
+                                    </span>
+                                    <span class="prop__value">
+                                        @Math.Ceiling(booking.Enclosure.PricePerDay) ₴
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="booking_btns-cont">
+                            <a class="action__delete action_btn" asp-action="DeleteBooking" asp-controller="Client"
+                               asp-route-animalBookedId="@booking.AnimalId">
+                                Delete Booking
+                                <img class="action_icon" src="~/img/trash-bin.png">
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="page__btns-wrapper">
+                <a asp-action="GetClientBookings" asp-controller="Client"
+                   asp-route-pageIndex="@(Model.Bookings!.PageIndex - 1)"
+                   class="page__btn btn @(!Model.Bookings!.HasPreviousPage ? "disabled" : "")">&larr; Previous</a>
+                <span class="page__index">@Model.Bookings!.PageIndex</span>
+                <a asp-action="GetClientBookings" asp-controller="Client"
+                   asp-route-pageIndex="@(Model.Bookings!.PageIndex + 1)"
+                   class="page__btn btn @(!Model.Bookings!.HasNextPage ? "disabled" : "")">Next &rarr;</a>
+            </div>
+        }
+        else
+        {
+            <div class="no_bookings-wrapper">
+                <img class="no_bookings-img" src="~/img/SadCat.png" alt="No Animals image">
+                <div class="no_bookings-title">
+                    You don't have any <span class="text-highlight">bookings</span> yet. Feel free to
+                    <span class="text-highlight">add one</span>!
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,134 @@
+﻿@model ReceptionistViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css" />
+    <link rel="stylesheet" href="~/css/clients.css"/>
+    <script defer src="~/js/modal_uni.js"></script>
+}
+
+@{
+    string? errorMessage = TempData["dAnimalError"] as string;
+}
+
+@section Main
+{
+    <div class="clients_wrapper">
+        <div class="clients_header">
+            <span class="clients_header-span text-highlight">Clients</span>
+        </div>
+        @if(Model.Clients!.Count != 0)
+        {
+            <div class="clients_cont">
+                @foreach (Client client in Model.Clients!)
+                {
+                    <a class="client_cont" asp-action="Clients" asp-controller="Receptionist" 
+                        asp-route-pageIndex="@Model.Clients!.PageIndex" asp-route-clientId="@client.Id">
+                            <div class="client-img-cont">
+                                 <img class="client-img-round" src="~/img/image_placeholder.png">
+                            </div>
+                            <span class="client-name-sp">@client.FirstName @client.LastName</span>
+
+                            <span class="client-birth-sp">Birth Date: @DateOnly.FromDateTime(client.BirthDate)</span>
+                            <span class="client-registered-sp">Registered Since: @DateOnly.FromDateTime(client.RegisteredSince)</span>
+                    </a>
+                }
+            </div>
+            <div class="page__btns-wrapper">
+                <a asp-action="GetClientBookings" asp-controller="Client"
+                   asp-route-pageIndex="@(Model.Clients!.PageIndex - 1)"
+                   class="page__btn btn @(!Model.Clients!.HasPreviousPage ? "disabled" : "")">&larr; Previous</a>
+                <span class="page__index">@Model.Clients!.PageIndex</span>
+                <a asp-action="GetClientBookings" asp-controller="Client"
+                   asp-route-pageIndex="@(Model.Clients!.PageIndex + 1)"
+                   class="page__btn btn @(!Model.Clients!.HasNextPage ? "disabled" : "")">Next &rarr;</a>
+            </div>
+        }
+        else
+        {
+        }
+    </div>
+
+    @if(Model.ActiveClient != null)
+    {
+        <div class="cl-modal modal @(Model.IsInteractedWithModal ? string.Empty : "hidden")">
+            <span class="modal__close-btn">X</span>
+
+            <div class="clmodal-header-wrapper">
+                <img class="clmodal-img-cont" src="~/img/image_placeholder.png">
+                <span class="client-name text-highlight">@Model.ActiveClient.FirstName @Model.ActiveClient.LastName</span>
+            </div>
+            <div class="cl-pers-info-wrapper">
+                <div class="clp_column l1">
+                    <div class="clp_row">
+                        <label class="profile__form-lbl">Email</label>
+                        <input class="form__input-txt" asp-for="ActiveClient!.LoginInfo!.Email" readonly>
+                    </div>
+                    <div class="clp_row-date">
+                        <label class="profile__form-lbl">Birth Date</label>
+                        <input class="form__input-date" asp-for="ActiveClient!.BirthDate" readonly>
+                    </div>
+                </div>
+                <div class="clp_column r1">
+                    <div class="clp_row">
+                        <label class="profile__form-lbl">Phone Number</label>
+                        <input class="form__input-txt" asp-for="ActiveClient!.LoginInfo!.PhoneNumber" readonly>
+                    </div>
+                    <div class="clp_row-date">
+                        <label class="profile__form-lbl">Registered Since</label>
+                        <input class="form__input-date" asp-for="ActiveClient!.RegisteredSince" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="clp-animals-header">
+                <span class="clp-animals-span">Client Animals</span>
+
+                <a class="add_animal-btn btn" asp-action="AddClientAnimalView" asp-controller="Receptionist"
+                asp-route-clientId="@Model.ActiveClient!.Id">Add Client Animal</a>
+            </div>
+            <div class="clp-animals-cont">
+                @foreach(Animal animal in Model.ActiveClient!.Animals!)
+                {
+                    <div class="clp-animal-cont">
+                        <div class="client-img-cont">
+                            <img class="client-img-round" src="~/img/image_placeholder.png">
+                        </div>
+                        <div class="animal-name-type">
+                            @animal.Name - @animal.AnimalType!.Name
+                        </div>
+                        <div class="animal-info">
+                            <span class="animal-in">
+                                Age: @animal.Age
+                            </span>
+                            <span class="animal-in">
+                                Weight: @animal.Weight
+                            </span>
+                        </div>
+                        <div class="a-btns-wrapper">
+                            <a class="action_btn action__edit" asp-action="EditClientAnimalView" asp-controller="Receptionist"
+                             asp-route-animalId="@animal.Id">
+                                Edit Animal
+                                <img class="action_icon" src="~/img/edit-pencil.png">
+                            </a>
+                            <a class="action__delete action_btn" asp-action="DeleteClientAnimal" asp-controller="Receptionist"
+                            asp-route-clientId="@Model.ActiveClient!.Id" asp-route-animalId="@animal.Id" 
+                            asp-route-pageIndex="@Model.Clients!.PageIndex">
+                                Delete Animal
+                                <img class="action_icon" src="~/img/trash-bin.png">
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="clp-footer-btn">
+                <span class="delete-animal-error">@errorMessage</span>
+                <a class="add_animal-btn btn" asp-action="CreateClientContract" asp-controller="Receptionist" 
+                asp-route-clientId="@Model.ActiveClient!.Id">
+                    Create Contract
+                </a>
+            </div>
+        </div>
+        <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+    }
+}

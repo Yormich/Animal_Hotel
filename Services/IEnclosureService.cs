@@ -16,5 +16,7 @@ namespace Animal_Hotel.Services
         public Task<(bool success, string? message)> UpdateEnclosure(AnimalEnclosure enclosure);
 
         public Task<List<EnclosureType>> GetEnclosureTypes();
+
+        public Task<List<AnimalEnclosure>> GetSuitableEnclosures(long animalId);
     }
 }

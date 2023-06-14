@@ -182,9 +182,7 @@ namespace Animal_Hotel
         private static void ConfigureBooking(EntityTypeBuilder<Booking> bBuilder)
         {
             bBuilder.HasOne(b => b.Enclosure)
-                .WithMany(e => e.Bookings)
-                .HasForeignKey(b => b.EnclosureId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .WithOne(e => e.Booking);
 
             bBuilder.HasOne(b => b.Animal)
                 .WithOne(a => a.Booking)

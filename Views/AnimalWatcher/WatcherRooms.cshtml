@@ -2,10 +2,47 @@
 
 @section ScriptsAndStylesheets
 {
-
+    <link  rel="stylesheet" href="~/css/rooms.css"/>
 }
 
 @section Main
 {
-
+    <div class="ar_rooms-page">
+        <div class="ar_rooms-header">
+            <span class="text-highlight ar_header">Rooms you are responsible for</span>
+        </div>
+        @if(Model.Rooms!.Count != 0)
+        {
+            <div class="rooms__wrapper">
+                @foreach (Room room in Model.Rooms!)
+                {
+                    <section class="ar_room-cont room__container">
+                        <img class="room__img" src="~/img/image_placeholder.png">  @*room.PhotoPath*@
+                        <div class="room__info-wrapper">
+                            <h1 class="room__title">Room @room.Id</h1>
+                            <span class="room__type">@(room.RoomType!.Type)</span>
+                            <h3 class="room__enclosures-amount">
+                                Number of available Enclosures:
+                                @(room.AvailableEnclosuresAmount)
+                            </h3>
+                            <span class="@(room.UnableToBook ? "not_" : string.Empty)available_status">
+                                Is
+                                @(room.UnableToBook ? "not" : string.Empty) available for bookings
+                            </span>
+                        </div>
+                    </section>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no_romms-wrapper">
+                <img class="no_rooms-img" src="~/img/HotelLogo.png" alt="No Animals image">
+                <div class="no_rooms-title">
+                    You don't have <span class="text-highlight">any rooms</span> you are resposnible for yet. Ask manager
+                    <span class="text-highlight">make you</span> responsible for some!
+                </div>
+            </div>
+        }
+    </div>
 }

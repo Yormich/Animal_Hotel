@@ -1,0 +1,71 @@
+﻿@model ClientDataViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/enclosures.css"/>
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <link rel="stylesheet" href="~/css/bookings.css"/>
+}
+
+@{
+    string? errorMessage = TempData["aBookingError"] as string;
+}
+
+@section Main
+{
+    <div class="abooking_wrapper">
+        <div class="booking_creation-header">
+            <span class="bcreate-header text-highlight">Booking Creation</span>
+        </div>
+        <form class="ab_form-wrapper" asp-action="CreateBooking" asp-controller="Client" method="post">
+            <input type="hidden" asp-for="Login"/>
+            <input type="hidden" asp-for="UserId"/>
+            <input type="hidden" asp-for="SubUserId"/>
+            <input type="hidden" asp-for="PhoneNumber"/>
+            <input type="hidden" asp-for="FirstName"/>
+            <input type="hidden" asp-for="LastName"/>
+
+            <div class="ab_els-wrapper">
+                <div class="ab_column l1">
+                    <div class="ab_row">
+                        <label class="profile__form-lbl" asp-for="ActiveBooking!.EnclosureId">Enclosure Number</label>
+                        <input class="form__input-num" asp-for="ActiveBooking!.EnclosureId" type="number" readonly/>
+                    </div>
+                    <div class="ab_row-date">
+                        <label class="profile__form-lbl" asp-for="ActiveBooking!.StartDate">Start Date</label>
+                        <input class="form__input-date" type="datetime-local" asp-for="ActiveBooking!.StartDate"/>
+                        <span asp-validation-for="ActiveBooking!.StartDate"></span>
+                    </div>
+                </div>
+                <div class="ab_column r1">
+                    <div class="ab_row">
+                        <label class="profile__form-lbl" asp-for="ActiveBooking!.AnimalId">Suitable Animal</label>
+                        <select class="form__input-select" asp-for="ActiveBooking!.AnimalId">
+                            @foreach(Animal animal in Model.Animals!)
+                            {
+                                if(animal.Id == Model.ActiveBooking!.AnimalId)
+                                {
+                                    <option value="@animal.Id" selected>@animal!.Name @animal!.AnimalType!.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@animal.Id">@animal!.Name @animal!.AnimalType!.Name</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="ActiveBooking!.AnimalId"></span>
+                    </div>
+                    <div class="ab_row-date">
+                        <label class="profile__form-lbl" asp-for="ActiveBooking!.EndDate">End Date</label>
+                        <input class="form__input-date" type="datetime-local" asp-for="ActiveBooking!.EndDate" />
+                        <span asp-validation-for="ActiveBooking!.EndDate"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal_ft-wrapper">
+                <span class="abook-error-span">@errorMessage</span>
+                <button class="btn__submit btn" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+}

@@ -29,10 +29,8 @@ namespace Animal_Hotel.Models.ModelConfigurations
                 .WithOne(c => c.Enclosure)
                 .HasForeignKey(c => c.EnclosureId);
 
-            builder.HasMany(ae => ae.Bookings)
-                .WithOne(b => b.Enclosure)
-                .HasForeignKey(b => b.EnclosureId);
-
+            builder.HasOne(ae => ae.Booking)
+                .WithOne(b => b.Enclosure);
         }
     }
 }

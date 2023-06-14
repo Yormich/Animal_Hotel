@@ -37,6 +37,7 @@ namespace Animal_Hotel.Models.DatabaseModels
         [NotMapped]
         public int AvailableEnclosuresAmount { get; set; }
 
+
         public Room(string photoPath, short roomTypeId)
         {
             this.PhotoPath = photoPath;

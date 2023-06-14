@@ -23,15 +23,17 @@ namespace Animal_Hotel.Controllers
         private readonly IUserLoginInfoService _userLoginService;
         private readonly IIFileProvider _fileProvider;
         private readonly IUserTypeService _userTypeService;
+        private readonly IImagePathProvider _pathProvider;
 
         public UserProfileController(ClaimHelper claimHelper, IUserLoginInfoService userLoginService, IMemoryCache cache,
-            IIFileProvider fileProvider, IUserTypeService userTypeService)
+            IIFileProvider fileProvider, IUserTypeService userTypeService, IImagePathProvider pathProvider)
         {
             _claimHelper = claimHelper;
             _userLoginService = userLoginService;
             _cache = cache; 
             _fileProvider = fileProvider;
             _userTypeService = userTypeService;
+            _pathProvider = pathProvider;
         }
 
         [HttpGet]
@@ -149,9 +151,9 @@ namespace Animal_Hotel.Controllers
                 //check file
                 if (_fileProvider.IsFileExtensionSupported(file.FileName))
                 {
-                    await _fileProvider.RemoveFileFromServer($"{model.Login}_{model.PhotoPath!}");
+                    await _fileProvider.RemoveFileFromServer(_pathProvider.BuildUserFileName(model.Login, model.PhotoPath!));
                     model.PhotoPath = file.FileName;
-                    await _fileProvider.UploadFileToServer(file, $"{model.Login}_{file.FileName}");
+                    await _fileProvider.UploadFileToServer(file, _pathProvider.BuildUserFileName(model.Login, file!.FileName));
                     return;
                 }
 

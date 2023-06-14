@@ -1,0 +1,127 @@
+﻿@model ClientDataViewModel
+
+@{
+    Layout = "_NoLoginLayout";
+}
+
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/rooms.css"/>
+    <link rel="stylesheet" href="~/css/enclosures.css"/>
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <script type="module" defer src="~/js/modal_uni.js"></script>
+}
+
+<body>
+    <div class="room_full-wrapper">
+        <span class="mt2 room_name-span text-highlight">Room @Model.ActiveRoom!.Id</span>
+        <div class="room_full-cont">
+            <div class="room_info-cont">
+                <div class="room_type-status-wrapper">
+                    <span class="room_type-span">
+                        @Model.ActiveRoom!.RoomType!.Type
+                    </span>
+                    <span class="room_encs-wrapper">
+                        <span class="pricing">
+                            Average Enclosure Price:
+                            @(Model.ActiveRoom!.Enclosures!.Count == 0 ? 0 : 
+                                Math.Ceiling(Model.ActiveRoom!.Enclosures.Average(e => e.PricePerDay))) ₴
+                            <span class="small__text-span">
+                                per day
+                            </span>
+                        </span>
+                        <span class="pricing">
+                            Max Enclosure Price:
+                            @(Model.ActiveRoom!.Enclosures!.Count == 0 ? 0 : 
+                                Math.Ceiling(Model.ActiveRoom!.Enclosures.Max(e => e.PricePerDay))) ₴
+                            <span class="small__text-span">
+                                per day
+                            </span>
+                        </span>
+                    </span>
+                </div>
+                <div class="room_image-wrapper">
+                    <img class="room_full-image" src="~/img/image_placeholder.png" />
+                </div>
+            </div>
+            <div class="enclosure_statuses-wrapper">
+                @foreach (EnclosureStatus status in Enum.GetValues<EnclosureStatus>())
+                {
+                    <div class="enclosure-status-cont">
+                        <div class="enclosure_status @(UtilFuncs.GetEnumDisplayName(status).ToLower())"></div>
+                        <span class="enclosure_status-name">@($"{UtilFuncs.GetEnumDisplayName(status)}")</span>
+                    </div>
+                }
+            </div>
+            <div class="room_enclosures-cont">
+                @foreach (AnimalEnclosure enclosure in Model.ActiveRoom!.Enclosures!)
+                {
+                    <a class="room_enclosure-cont @UtilFuncs.GetEnumDisplayName(enclosure.EnclosureStatus).ToLower()"
+                       asp-action="GetRoomClientInfo" asp-controller="Client" asp-route-roomId="@Model.ActiveRoom!.Id"
+                       asp-route-enclosureId="@enclosure.Id" asp-route-status="@enclosure.EnclosureStatus">
+                        @enclosure.Id
+                    </a>
+                }
+            </div>
+        </div>
+        @if(Model.ActiveEnclosure != null)
+        {
+            <div class="enc_room-modal modal @(Model.IsInteractedWithModal ? string.Empty : "hidden")">
+                <span class="modal__close-btn">X</span>
+                <span class="enr_modal-header text-highlight">
+                    Enclosure @Model.ActiveEnclosure!.Id
+                </span>
+                
+                <div class="enr_modal-els-wrapper">
+                    <div class="rg10 l1">
+                        <div class="enr__row">
+                            <label class="profile__form-lbl">Price Per Day</label>
+                            <input class="form__input-num" value="@Math.Round(Model.ActiveEnclosure!.PricePerDay, 2)" readonly>
+                        </div>
+                        <div class="enr__row">
+                            <label class="profile__form-lbl">Enclosure Type</label>
+                            <select class="form__input-select">
+                                <option value="@Model.ActiveEnclosure!.Id" selected>@Model.ActiveEnclosure!.EnclosureType!.Name</option>
+                            </select>
+                        </div>
+                        <div class="enr__row">
+                            <label class="profile__form-lbl">Status: </label>
+                            <span class="enclosure_status-name text_@(UtilFuncs.GetEnumDisplayName(Model.ActiveEnclosure!.EnclosureStatus)
+                                .ToLower())">@($"{UtilFuncs.GetEnumDisplayName(Model.ActiveEnclosure!.EnclosureStatus)}")</span>
+                        </div>
+                    </div>
+                    <div class="rg10 r1">
+                        <div class="enr__row">
+                            <label class="profile__form-lbl">Max Animals</label>
+                            <input class="form__input-num" type="number" value="@Model.ActiveEnclosure!.MaxAnimals" readonly>
+                        </div>
+                        <div class="enr__row">
+                            <label class="profile__form-lbl">Animal Type</label>
+                            <select class=form__input-select>
+                                <option value="@Model.ActiveEnclosure!.AnimalTypeId" selected>@Model.ActiveEnclosure!.AnimalType!.Name</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                @if(Model.ActiveEnclosure.EnclosureStatus == EnclosureStatus.None)
+                {
+                    <div class="enc_room-btns-wrapper">
+                        <a class="bkng-add-btn btn" asp-action="CreateBookingView" asp-controller="Client" 
+                            asp-route-enclosureId="@Model.ActiveEnclosure!.Id">
+                            Add Booking
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="enc_occupied-msg">
+                        You can not create booking to enclosure with @UtilFuncs.GetEnumDisplayName(Model.ActiveEnclosure!.EnclosureStatus) status
+                    </div>
+                }
+            </div>
+            <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+        }
+    </div>
+</body>

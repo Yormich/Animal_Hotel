@@ -11,7 +11,7 @@ namespace Animal_Hotel.Models.DatabaseModels
         [Column("animal_id")]
         [ForeignKey("Animal")]
         public long AnimalId { get; set; }
-        public Animal Animal { get; set; } = null!;
+        public Animal? Animal { get; set; }
 
         [Required]
         [Column("start_date")]
@@ -26,7 +26,7 @@ namespace Animal_Hotel.Models.DatabaseModels
         [ForeignKey("Enclosure")]
         public long EnclosureId { get; set; }
 
-        public AnimalEnclosure Enclosure { get; set; } = null!;
+        public AnimalEnclosure? Enclosure { get; set; }
 
         public Booking(long animalId, long enclosureId, DateTime startDate, DateTime endDate)
         {
@@ -34,6 +34,10 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.EnclosureId = enclosureId;
             this.StartDate = startDate;
             this.EndDate = endDate;
+        }
+
+        public Booking()
+        {
         }
     }
 }

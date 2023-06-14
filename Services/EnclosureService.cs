@@ -110,6 +110,28 @@ namespace Animal_Hotel.Services
             return _db.EnclosureTypes.FromSqlRaw(sql).AsQueryable().ToListAsync();
         }
 
+        public Task<List<AnimalEnclosure>> GetSuitableEnclosures(long animalId)
+        {
+            string sql = "SELECT ae.* FROM dbo.animal_enclosure ae" +
+                " WHERE ae.id NOT IN " +
+                " (" +
+                "   SELECT aeInner.id FROM dbo.occupied_enclosures aeInner" +
+                "   LEFT JOIN dbo.booking b ON b.enclosure_id = aeInner.id" +
+                "   WHERE b.animal_id IS NULL OR b.animal_id IS NOT NULL AND b.animal_id <> @animalId" +
+                " ) " +
+                " AND ae.animal_type_id = " +
+                " (" +
+                "   SELECT at.id FROM dbo.animal_type at" +
+                "   INNER JOIN dbo.animal a ON a.type_id = at.id" +
+                "   WHERE a.id = @animalId)";
+
+            SqlParameter animalParam = new("animalId", animalId);
+
+            return _db.Enclosures.FromSqlRaw(sql, animalParam)
+                .Include(e => e.EnclosureType)
+                .ToListAsync();
+        }
+
         public async Task<(bool success, string? message)> UpdateEnclosure(AnimalEnclosure enclosure)
         {
             string sql = "EXEC dbo.UpdateEnclosure" +

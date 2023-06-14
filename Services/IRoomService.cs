@@ -20,8 +20,12 @@ namespace Animal_Hotel.Services
 
         public Task<Room> GetManagerRoomInfo(short roomId);
 
+        public Task<Room> GetClientRoomInfo(short roomId);
+
         public Task<(bool success, string? message)> RemoveRoom(short roomId);
 
         public Task<List<RoomType>> GetRoomTypes();
+
+        public Task<List<Room>> GetRoomsWithFreeEnclosuresCount(long watcherId);
     }
 }

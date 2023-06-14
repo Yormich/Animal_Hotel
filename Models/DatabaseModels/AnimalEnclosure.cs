@@ -55,7 +55,7 @@ namespace Animal_Hotel.Models.DatabaseModels
         [NotMapped]
         public EnclosureStatus EnclosureStatus { get; set; } = EnclosureStatus.None;
 
-        public List<Booking>? Bookings { get; set; }
+        public Booking? Booking { get; set; }
 
         public List<Contract>? Contracts { get; set; }
 

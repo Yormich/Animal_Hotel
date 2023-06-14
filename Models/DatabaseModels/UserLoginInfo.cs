@@ -13,16 +13,16 @@ namespace Animal_Hotel.Models.DatabaseModels
         [Column("login")]
         [EmailAddress(ErrorMessage = "Please enter correct email")]
         [StringLength(maximumLength: 50, ErrorMessage = "Login length should be between 6 and 50 characters", MinimumLength = 6)]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public byte[] Password { get; set; }
+        public byte[] Password { get; set; } = Array.Empty<byte>(); 
 
         [Required]
         [Column("phone_number")]
         [Phone(ErrorMessage = "Please enter correct phone number")]
         [StringLength(maximumLength: 20, ErrorMessage = "Phone number should contain from 10 to 20 characters", MinimumLength = 10)]
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
 
         [Required]
         [Column("user_type_id")]
@@ -52,6 +52,11 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.UserTypeId = userTypeId;
             this.ClientId = clientId;
             this.EmployeeId = employeeId;
+        }
+
+        public UserLoginInfo()
+        {
+        
         }
     }
 }

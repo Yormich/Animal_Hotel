@@ -19,10 +19,15 @@ namespace Animal_Hotel.Controllers
         private readonly IIFileProvider _fileProvider;
         private readonly IContractService _contractService;
         private readonly IReviewService _reviewService;
+        private readonly IImagePathProvider _pathProvider;
+        private readonly IBookingService _bookingService;
+        private readonly IRoomService _roomService;
+        private readonly IEnclosureService _enclosureService;
 
         public ClientController(IAnimalService animalService, ClaimHelper claimHelper, IUserTypeService userTypeService,
             IMemoryCache memoryCache, IIFileProvider fileProvider, IContractService contractService,
-            IReviewService reviewService) 
+            IReviewService reviewService, IImagePathProvider pathProvider, IBookingService bookingService,
+            IRoomService roomService, IEnclosureService enclosureService) 
         {
             _animalService = animalService;
             _claimHelper = claimHelper;
@@ -31,6 +36,126 @@ namespace Animal_Hotel.Controllers
             _fileProvider = fileProvider;
             _contractService = contractService;
             _reviewService = reviewService;
+            _pathProvider = pathProvider;
+            _bookingService = bookingService;
+            _roomService = roomService;
+            _enclosureService = enclosureService;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> GetRoomClientInfo(short roomId, long? enclosureId, EnclosureStatus? status)
+        {
+            ClientDataViewModel client = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache))
+            {
+                ActiveRoom = await _roomService.GetClientRoomInfo(roomId),
+            };
+
+            if (enclosureId != null)
+            {
+                client.ActiveEnclosure = await _enclosureService.GetEnclosureById(enclosureId);
+                client.ActiveEnclosure!.EnclosureStatus = status ?? EnclosureStatus.None;
+                client.IsInteractedWithModal = true;
+            }
+
+            return View("ClientRoomInfo", client);
+        }
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> CreateBookingView(long enclosureId)
+        {
+            ClientDataViewModel client = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache));
+            var animals = await _animalService.GetSuitableAnimals(enclosureId, client.SubUserId);
+            client.Animals = new(animals, animals.Count, 0, 0);
+            client.ActiveBooking = new() 
+            {
+                StartDate = DateTime.Now.AddDays(1),
+                EndDate = DateTime.Now.AddDays(7),
+                EnclosureId = enclosureId,
+            };
+
+            return View("CreateBooking", client);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> CreateBooking(ClientDataViewModel model)
+        {
+            Booking activeBooking = model.ActiveBooking!;
+
+            if (activeBooking.StartDate <= DateTime.Now.AddDays(1))
+            {
+                ModelState.AddModelError("ActiveBooking.StartDate", "Booking date must be at least 1 day after current date");
+            }
+
+            if (activeBooking.EndDate.Subtract(activeBooking.StartDate).Days < 1)
+            {
+                ModelState.AddModelError("ActiveBooking.EndDate", "Booking end date must be at least 1 day greater than start date");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache));
+                model.Animals = new(await _animalService.GetSuitableAnimals(activeBooking.EnclosureId, model.SubUserId), 0, 0, 0);
+                model.ActiveBooking = activeBooking;
+
+                return View("CreateBooking", model);
+            }
+
+            var results = await _bookingService.CreateBooking(activeBooking);
+
+            if (!results.success)
+            {
+                model = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache));
+                model.Animals = new(await _animalService.GetSuitableAnimals(activeBooking.EnclosureId, model.SubUserId), 0, 0, 0);
+                model.ActiveBooking = activeBooking;
+                TempData["aBookingError"] = results.message;
+                return View("CreateBooking", model);
+            }
+
+            return RedirectToAction("GetClientBookings");
+        }
+
+
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> DeleteBooking(long animalBookedId)
+        {
+            await _bookingService.DeleteBooking(animalBookedId);
+
+            return RedirectToAction("GetClientBookings");
+        }
+
+
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        [ActionMapper("GetClientContracts", "Client", "Your Contracts")]
+        public async Task<IActionResult> GetClientContracts(long? contractId)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Client")]
+        [ActionMapper("GetClientBookings", "Client", "Bookings")]
+        public async Task<IActionResult> GetClientBookings(int? pageIndex, long? bookedAnimalId)
+        {
+            int index = pageIndex ?? 1, pageSize = 10;
+            ClientDataViewModel client = new(await UserViewModel.CreateUser(_claimHelper, _userTypeService, _memoryCache)) 
+            {
+                ActiveAction = "GetClientBookings",
+            };
+            client.Bookings = new(await _bookingService.GetClientBookingsByPage(client.SubUserId, index, pageSize),
+                await _bookingService.GetClientBookingsCount(client.UserId),
+                index, pageSize);
+
+            if (bookedAnimalId != null)
+            {
+                client.ActiveBooking = await _bookingService.GetBookingById(bookedAnimalId);
+                client.IsInteractedWithModal = true;
+            }
+
+            return View("Bookings", client);
         }
 
         [HttpGet]
@@ -85,10 +210,10 @@ namespace Animal_Hotel.Controllers
 
                 if (_fileProvider.IsFileExtensionSupported(file.FileName))
                 {
-                    string uniqueFilePath = $"{client.Login}_animal{editedAnimal.Id}_@fileName";
-                    await _fileProvider.RemoveFileFromServer(uniqueFilePath.Replace("@fileName", oldPhotoPath));
+                    await _fileProvider.RemoveFileFromServer(_pathProvider.BuildAnimalFileName(client.Login, editedAnimal.Id, oldPhotoPath));
                     editedAnimal.PhotoPath = file.FileName;
-                    await _fileProvider.UploadFileToServer(file, uniqueFilePath.Replace("@fileName", editedAnimal.PhotoPath));
+                    await _fileProvider.UploadFileToServer(file, 
+                        _pathProvider.BuildAnimalFileName(client.Login, editedAnimal.Id, editedAnimal.PhotoPath));
                 }
                 else
                 {
@@ -118,13 +243,13 @@ namespace Animal_Hotel.Controllers
         [Authorize(Roles = "Client")]
         public async Task<IActionResult> DeleteAnimal(long animalId, int pageIndex)
         {
-            if (await _animalService.AnimalHasActiveContractOrBooking(animalId))
+            var deleteResult = await _animalService.DeleteAnimalById(animalId);
+
+            if (!deleteResult.success)
             {
-                TempData["DeleteError"] = "You can't delete animal with active contract or booking.";
+                TempData["DeleteError"] = deleteResult.message;
                 return RedirectToAction("GetClientAnimals", new { pageIndex, animalId });
             }
-
-            await _animalService.DeleteAnimalById(animalId);
 
             return RedirectToAction("GetClientAnimals", new { pageIndex });
         }
@@ -183,7 +308,8 @@ namespace Animal_Hotel.Controllers
             long createdAnimalId = await _animalService.CreateAnimal(animal);
             if (file != null)
             {
-                await _fileProvider.UploadFileToServer(file!, $"{client.Login}_animal{createdAnimalId}_{file!.FileName}");
+                await _fileProvider.UploadFileToServer(file!, 
+                    _pathProvider.BuildAnimalFileName(client.Login, createdAnimalId, file!.FileName));
             }
 
             int? pageIndex = (int?)TempData["animal_a_pageIndex"];

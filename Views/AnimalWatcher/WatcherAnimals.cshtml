@@ -1,0 +1,128 @@
+﻿@model AnimalWatcherViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/animals.css"/>
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+    <script type="module" defer src="~/js/modal_uni.js"></script>
+}
+
+@section Main
+{
+    <div class="room__animal-page">
+        <div class="room_animals-header">
+            <span class="an_page-title text-highlight">Animals from responsible rooms</span>
+        </div>
+        @if (Model.Animals!.Count != 0)
+        {
+            <div class="animals__wrapper">
+                @foreach (Animal animal in Model.Animals!)
+                {
+                    <a class="room__animal-wrapper pointer" asp-action="GetWatcherAnimals" asp-controller="AnimalWatcher"
+                       asp-route-pageIndex="@Model.Animals.PageIndex" asp-route-animalId="@animal.Id">
+                           <img class="animal__photo" src="~/img/image_placeholder.png">
+                           <div class="card__info-container">
+                               <span class="animal__name">@animal.Name</span>
+                               <span class="animal__type">@animal.AnimalType!.Name</span>
+                                <div class="acard__row">
+                                    <div class="acard__column">
+                                        <span class="attr__name">Age: </span>
+                                        <span class="attr__value">@animal.Age</span>
+                                    </div>
+                                    <div class="acard__column">
+                                        <span class="attr__name">Sex: </span>
+                                        <span class="attr__value">@animal.Sex</span>
+                                    </div>
+                                </div>
+                                <div class="acard__row">
+                                    <div class="acard__column">
+                                        <span class="attr__name">Weight: </span>
+                                        <span class="attr__value">@Math.Round(animal.Weight, 2) kg.</span>
+                                    </div>
+                                </div>
+                           </div>
+                    </a>
+                }
+            </div>
+
+            @if (Model.ActiveAnimal != null)
+            {
+                <div class="ranimal_modal modal@(Model.IsInteractedWithModal ? string.Empty : "hidden")">
+                    <span class="modal__close-btn">X</span>
+
+                    <div class="amodal_header-wrapper">
+                        <span class="amodal_header text-highlight">
+                            @($"{Model.ActiveAnimal!.AnimalType!.Name} {Model.ActiveAnimal!.Name}")
+                        </span>
+                        <div class="modal_animal_image-cont">
+                            <img class="modal_animal_image" src="~/img/image_placeholder.png" alt="Modal Animal Image">
+                        </div>
+                    </div>
+
+                    <div class="room_animal-els-wrapper">
+                        <div class="ra_column l1">
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Client Name</label>
+                                <input class="form__input-txt" 
+                                    value="@($"{Model.ActiveAnimal!.Owner!.FirstName} {Model.ActiveAnimal!.Owner!.LastName}")" readonly>
+                            </div>
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Client Email</label>
+                                <input class="form__input-txt" value="@Model.ActiveAnimal!.Owner!.LoginInfo!.Email" readonly>
+                            </div>
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Animal Weight</label>
+                                <input class="form__input-num" type="number" asp-for="ActiveAnimal!.Weight" readonly>
+                            </div>
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Animal Sex</label>
+                                <input class="form__input-txt" value="@Model.ActiveAnimal!.Sex" readonly>
+                            </div>
+                        </div>
+                        <div class="ra_column r1">
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Client Phone</label>
+                                <input class="form__input-txt" value="@Model.ActiveAnimal!.Owner!.LoginInfo!.PhoneNumber" readonly>
+                            </div>
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Animal Name</label>
+                                <input class="form__input-txt" value="@Model.ActiveAnimal!.Name" readonly>
+                            </div>
+                            <div class="ra_row">
+                                <label class="profile__form-lbl">Animal Age</label>
+                                <input class="form__input-num" type="number" value="@Model.ActiveAnimal!.Age" readonly>
+                            </div>
+                        </div>
+                        <div class="prefer_row">
+                            <label class="profile__form-lbl">Animal Preferences</label>
+                            <textarea class="form__input-textarea" readonly>@Model.ActiveAnimal!.Preferences</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="overlay @(Model.IsInteractedWithModal ? string.Empty : "hidden")"></div>
+            }
+
+            <div class="page__btns-wrapper">
+                <a asp-action="GetWatcherAnimals" asp-controller="AnimalWatcher" asp-route-pageIndex="@(Model.Animals!.PageIndex - 1)"
+                   class="page__btn btn @(Model.Animals!.HasPreviousPage ? string.Empty : "disabled")">
+                    &larr; Previous
+                </a>
+                <h3 class="page_index-header"> @Model.Animals!.PageIndex </h3>
+                <a asp-action="HotelRooms" asp-controller="HotelManager" asp-route-pageIndex="@(Model.Animals!.PageIndex + 1)"
+                   class="page__btn btn @(Model.Animals!.HasNextPage ? string.Empty : "disabled")">
+                    Next &rarr;
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="no_animals-wrapper">
+                <img class="no_animals-img" src="~/img/SadCat.png" alt="No Animals image">
+                <div class="no_animals-title">
+                    You don't have any <span class="text-highlight">responsible animals</span> yet. Ask manager
+                    <span class="text-highlight">make you</span> responsible for some!
+                </div>
+            </div>
+        }
+    </div>
+}

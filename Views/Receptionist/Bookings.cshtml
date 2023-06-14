@@ -1,0 +1,100 @@
+﻿@model ReceptionistViewModel
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/bookings.css"/>
+    <link rel="stylesheet" href="~/css/baseforms.css"/>
+}
+
+@{
+    string? errorMessage = TempData["dBookingError"] as string;
+}
+
+@section Main{
+    <div class="bookings-wrapper">
+        <div class="bookings-header">
+            <span class="bookings-header-span text-highlight">Bookings Amount - @Model.BaseReports!.Count</span>
+            <div class="search_by_date">
+                <form class="search_els_wrapper" asp-action="Bookings" asp-controller="Receptionist" method="get">
+                    <input class="form__input-date" asp-for="TargetDate" type="datetime-local" />
+                    <button class="search_btn btn" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+        @if (Model.BaseReports!.Count != 0)
+        {
+            <div class="bookings_cont">
+                <span class="abook-error-span">@errorMessage</span>
+                @foreach (ReceptionistReport bookingR in Model.BaseReports!)
+                {
+                    <div class="booking_cont">
+                        <div class="booking_info-cont">
+                            <div class="booking_header">
+                                Booking for @bookingR.Animal!.AnimalType!.Name @bookingR.Animal!.Name
+                            </div>
+                            <div class="rent_period">
+                                Renting Period: <span class="bperiod">@bookingR.StartDate - @bookingR.EndDate</span>
+                                Period: @bookingR.Period days
+                            </div>
+                            <div class="booking_enc-info">
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Enclosure Location:
+                                        <span class="prop__value">
+                                            Enclosure @bookingR.EnclosureId
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Price Per Day
+                                    </span>
+                                    <span class="prop__value">
+                                        @Math.Ceiling(bookingR.Enclosure!.PricePerDay) ₴
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="client_enc-info">
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Owner Name:
+                                        <span class="prop__value">
+                                            @bookingR.ClientName
+                                        </span>
+                                    </span>
+                                </span>
+                                <span class="property">
+                                    <span class="prop__name">
+                                        Owner Phone: 
+                                    </span>
+                                    <span class="prop__value">
+                                        @bookingR.ClientPhone
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="booking_btns-cont">
+                            <a class="action__delete action_btn" asp-action="DeleteBooking" asp-controller="Receptionist"
+                               asp-route-animalBookedId="@bookingR.AnimalId" 
+                               asp-route-startOffset="@(((DateTimeOffset)bookingR.StartDate).ToUnixTimeSeconds())"
+                                asp-route-targetOffset="@(((DateTimeOffset)Model.TargetDate).ToUnixTimeSeconds())">
+                                Delete Booking
+                                <img class="action_icon" src="~/img/trash-bin.png">
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no_bookings-wrapper">
+                <img class="no_bookings-img" src="~/img/SadCat.png" alt="No Animals image">
+                <div class="no_bookings-title">
+                    There are no <span class="text-highlight">bookings</span> for this date. Check your
+                    <span class="text-highlight">target date</span>.
+                </div>
+            </div>
+        }
+    </div>
+}

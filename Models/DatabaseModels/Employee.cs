@@ -50,6 +50,9 @@ namespace Animal_Hotel.Models.DatabaseModels
 
         public List<Request>? Requests { get; set; }
 
+        [NotMapped]
+        public int ResponsibleAnimalsAmount { get; set; }
+
         public Employee(string firstName, string lastName, decimal salary, char sex, DateTime birthDate, 
             DateTime hiredSince, string photoPath)
         {

@@ -1,4 +1,5 @@
 ﻿@model HomePageViewModel
+@inject ClaimHelper claimHelper
 
 @section ScriptsAndStylesheets
 {
@@ -7,7 +8,7 @@
 }
 
 <body class="body">
-    <div class="authorization-required">* You must be authorized to view enclosures</div>
+    <div class="authorization-required">* You must be authorized client to view enclosures</div>
     <main class="main">
         <div class="rooms__wrapper">
             @foreach (Room room in Model.Rooms!)
@@ -37,8 +38,10 @@
                         </div>
                     </div>
                     <div class="view__btn-wrapper">
-                        <a class="enclosures-btn btn @(room.Enclosures.Count == 0 ? "disabled" : "")" 
-                            asp-action="Room" asp-controller="AnimalHotel" asp-route-roomId="@(room.Id)">View Enclosures</a>
+                        <a class="enclosures-btn btn
+                            @(room.Enclosures.Count == 0 ||
+                                !User.Identity!.IsAuthenticated || claimHelper.GetClaimValue(ClaimTypes.Role) != "Client" ? "disabled" : "")"
+                           asp-action="GetRoomClientInfo" asp-controller="Client" asp-route-roomId="@(room.Id)">View Enclosures</a>
                     </div>
                 </section>
             }

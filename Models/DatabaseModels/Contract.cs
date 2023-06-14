@@ -25,14 +25,14 @@ namespace Animal_Hotel.Models.DatabaseModels
         [ForeignKey("Animal")]
         public long AnimalId { get; set; }
 
-        public Animal Animal { get; set; } = null!;
+        public Animal? Animal { get; set; }
 
         [Required]
         [Column("enclosure_id")]
         [ForeignKey("Enclosure")]
         public long EnclosureId { get; set; }
 
-        public AnimalEnclosure Enclosure { get; set; } = null!;
+        public AnimalEnclosure? Enclosure { get; set; }
 
         [Column("full_price")]
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
@@ -49,5 +49,7 @@ namespace Animal_Hotel.Models.DatabaseModels
             this.EnclosureId = enclosureId;
             this.ActuallyPaid = actuallyPaid;
         }
+
+        public Contract() { }
     }
 }

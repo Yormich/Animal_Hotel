@@ -1,0 +1,101 @@
+﻿@model ReceptionistViewModel
+@inject ClaimHelper claimHelper
+
+@section ScriptsAndStylesheets
+{
+    <link rel="stylesheet" href="~/css/baseforms.css" />
+    <link rel="stylesheet" href="~/css/animals.css" />
+}
+
+@{
+    var possibleGenders = new char[] { 'F', 'M' };
+}
+
+@section Main
+{
+    <span class="form__header-span text-highlight">Client @Model.ActiveAnimal!.AnimalType!.Name @Model.ActiveAnimal!.Name</span>
+    <section class="aform__section">
+        <form class="form2-cont" asp-action="EditClientAnimal" asp-controller="Receptionist" enctype="multipart/form-data"
+            asp-route-oldPhotoPath="@(Model.ActiveAnimal!.PhotoPath ?? string.Empty)">
+            <input asp-for="Login" type="hidden" />
+            <input asp-for="LastName" type="hidden" />
+            <input asp-for="FirstName" type="hidden" />
+            <input asp-for="PhoneNumber" type="hidden" />
+
+            <input asp-for="ActiveAnimal!.Id" type="hidden" />
+            <input asp-for="ActiveAnimal!.OwnerId" type="hidden" />
+
+            <div class="form2_els-wrapper">
+                <div class="amodal2__column l1">
+                    <div class="amodal2__row">
+                        <label asp-for="ActiveAnimal!.Name" class="profile__form-lbl aform__lbl-position">Name</label>
+                        <input class="form__input-txt aform__input-position" type="text" asp-for="ActiveAnimal!.Name"
+                            value="@Model.ActiveAnimal!.Name"/>
+                        <span asp-validation-for="ActiveAnimal!.Name"></span>
+                    </div>
+                    <div class="amodal2__row">
+                        <label asp-for="ActiveAnimal!.Age" class="profile__form-lbl aform__lbl-position">Age</label>
+                        <input class="form__input-num aform__input-position" type="number" asp-for="ActiveAnimal!.Age"
+                               min="@Model.ActiveAnimal!.Age" max="50" step="1" value="@Model.ActiveAnimal!.Age"/>
+                        <span asp-validation-for="ActiveAnimal!.Age"></span>
+                    </div>
+                    <div class="amodal2__row">
+                        <label asp-for="ActiveAnimal!.TypeId" class="profile__form-lbl aform__lbl-position">Type</label>
+                        <select class="form__input-select aform__input-position" asp-for="ActiveAnimal!.TypeId" readonly>
+                            <option value="@Model.ActiveAnimal!.TypeId" selected>@Model.ActiveAnimal!.AnimalType!.Name</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="amodal2__column r1">
+                    <div class="amodal2__row">
+                        <label class="profile__form-lbl aform__lbl-position">Owner</label>
+                        <input class="form__input-txt aform__input-position" type="text" value="@claimHelper.GetClaimValue(ClaimTypes.Name)" readonly>
+                    </div>
+                    <div class="amodal2__row">
+                        <label asp-for="ActiveAnimal!.Weight" class="profile__form-lbl aform__lbl-position">Weight</label>
+                        <input class="form__input-num aform__input-position" type="number" asp-for="ActiveAnimal!.Weight"
+                               min="0.1" max="30" step="0.1"/>
+                        <span asp-validation-for="ActiveAnimal!.Weight"></span>
+                    </div>
+                    <div class="amodal2__row">
+                        <label class="profile__form-lbl aform__lbl-position" asp-for="ActiveAnimal!.Sex">Sex</label>
+                        <select class="form__input-select aform__input-position" asp-for="ActiveAnimal!.Sex" readonly>
+                            <option selected value="@Model.ActiveAnimal!.Sex">@Model.ActiveAnimal!.Sex</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="big_input__row c_span2">
+                    <label class="profile__form-lbl big_input-lbl-pos" asp-for="ActiveAnimal!.PhotoPath">Animal Photo</label>
+                    <label for="photo-input" class="for_input-file form__input-file-input big_input-input-pos">
+                        @if (Model.ActiveAnimal!.PhotoPath != null)
+                        {
+                            @Model.ActiveAnimal!.PhotoPath
+                        }
+                        else
+                        {
+                            <span>
+                                Upload animal photo <br />
+                                by clicking on that input <br />
+                                <span class="small__text-blue">+</span>
+                            </span>
+                        }
+                    </label>
+                    <input id="photo-input" class="form__input-file form__input" asp-for="ActiveAnimal!.PhotoPath"
+                       value="@Model.ActiveAnimal!.PhotoPath" type="file" accept="image/png,image/jpeg" />
+                    <span class="big_input-vld-pos" asp-validation-for="ActiveAnimal!.PhotoPath"></span>
+                </div>
+                <div class="big_input__row c_span2">
+                    <label asp-for="ActiveAnimal!.Preferences" class="profile__form-lbl big_input-lbl-pos">Animal Preferences</label>
+                    <textarea asp-for="ActiveAnimal!.Preferences" class="form__input-textarea big_input-input-pos">
+                        @(string.IsNullOrEmpty(Model.ActiveAnimal!.Preferences) ? "Unset" : Model.ActiveAnimal!.Preferences)
+                        </textarea>
+                    <span class="big_input-vld-pos" asp-validation-for="ActiveAnimal!.Preferences"></span>
+                </div>
+            </div>
+
+
+            <button class="btn__submit btn btn__mt" type="submit">Submit</button>
+        </form>
+    </section>
+}

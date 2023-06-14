@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.FileProviders;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Animal_Hotel.Controllers
 {
@@ -22,10 +23,12 @@ namespace Animal_Hotel.Controllers
         private readonly IRoomService _roomService;
         private readonly IEnclosureService _enclosureService;
         private readonly IAnimalService _animalService;
+        private readonly IImagePathProvider _pathProvider;
 
         public HotelManagerController(ClaimHelper claimHelper, IUserTypeService userTypeService, IMemoryCache memoryCache,
             IEmployeeService employeeService, IUserLoginInfoService userSerice, IIFileProvider fileProvider,
-            IRequestService requestService, IRoomService roomService, IEnclosureService enclosureService, IAnimalService animalService)
+            IRequestService requestService, IRoomService roomService, IEnclosureService enclosureService, IAnimalService animalService,
+            IImagePathProvider pathProvider)
         {
             _claimHelper = claimHelper;
             _userTypeService = userTypeService;
@@ -37,6 +40,14 @@ namespace Animal_Hotel.Controllers
             _roomService = roomService;
             _enclosureService = enclosureService;
             _animalService = animalService;
+            _pathProvider = pathProvider;
+        }
+        [HttpGet]
+        [Authorize(Roles = "HotelManager")]
+        [ActionMapper("Reports", "HotelManager", "Hotel Reports")]
+        public async Task Reports()
+        {
+            throw new NotImplementedException();
         }
 
         [HttpGet]
@@ -230,7 +241,7 @@ namespace Animal_Hotel.Controllers
             }
 
             short insertedId = await _roomService.CreateRoom(activeRoom);
-            await _fileProvider.UploadFileToServer(file!, $"room_{insertedId}_{file!.FileName}");
+            await _fileProvider.UploadFileToServer(file!, _pathProvider.BuildRoomFileName(insertedId, file!.FileName));
 
             int pageIndex = (int)TempData[$"{model.UserId}_aroom"]!;
 
@@ -270,9 +281,9 @@ namespace Animal_Hotel.Controllers
                 var file = files[0];
                 if (_fileProvider.IsFileExtensionSupported(file.FileName) && ModelState.IsValid)
                 {
-                    await _fileProvider.RemoveFileFromServer($"room_{updatedRoom.Id}_{file!.FileName}");
+                    await _fileProvider.RemoveFileFromServer(_pathProvider.BuildRoomFileName(updatedRoom!.Id, updatedRoom!.PhotoPath));
                     await _roomService.UpdateRoomPhoto(updatedRoom.Id, file!.FileName);
-                    await _fileProvider.UploadFileToServer(file, $"room_{updatedRoom.Id}_{file!.FileName}");
+                    await _fileProvider.UploadFileToServer(file, _pathProvider.BuildRoomFileName(updatedRoom!.Id, file!.FileName));
                 }
                 else
                 {
@@ -493,7 +504,7 @@ namespace Animal_Hotel.Controllers
                 if (_fileProvider.IsFileExtensionSupported(file.FileName))
                 {
                     newEmployee.PhotoPath = file.FileName;
-                    await _fileProvider.UploadFileToServer(file, $"{newEmployee.Login}_{file.FileName}");
+                    await _fileProvider.UploadFileToServer(file, _pathProvider.BuildUserFileName(newEmployee!.Login, file.FileName));
                 }
                 else
                 {

@@ -3,16 +3,22 @@ using Animal_Hotel.Models.ViewModels.RegisterViewModels;
 using Animal_Hotel.Models.ViewModels.RoleViewModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Animal_Hotel.Services
 {
     public class EmployeeService : IEmployeeService
     {
         private readonly AnimalHotelDbContext _db;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IDbConnectionProvider _connectionProvider;
 
-        public EmployeeService(AnimalHotelDbContext db)
+        public EmployeeService(AnimalHotelDbContext db, IHttpContextAccessor contextAccessor, IDbConnectionProvider connectionProvider)
         {
             _db = db;
+            _contextAccessor = contextAccessor;
+            _connectionProvider = connectionProvider;
         }
 
         public Task<EmployeeDataViewModel?> GetEmployeeById(long? employeeId)
@@ -211,6 +217,70 @@ namespace Animal_Hotel.Services
             SqlParameter roomParam = new("roomId", roomId);
 
             return _db.Employees.FromSqlRaw(sql, roomParam).AsQueryable().ToListAsync();
+        }
+
+        public async Task<List<Employee>> GetWatcherWithRelatedAnimalsCount(long? watcherId = null)
+        {
+            string connectionString = _connectionProvider.GetConnection(_contextAccessor.HttpContext);
+            string sql = "SELECT e.*, (SELECT COUNT(*) FROM " +
+                " (" +
+                "   SELECT DISTINCT a.id FROM dbo.animal a" +
+                "   INNER JOIN dbo.contract c ON c.animal_id = a.id" +
+                "   INNER JOIN dbo.animal_enclosure ae ON ae.id = c.enclosure_id" +
+                "   INNER JOIN dbo.room r ON r.id = ae.room_id" +
+                "   INNER JOIN dbo.room_employee re ON re.room_id = r.id" +
+                "   INNER JOIN dbo.employee eInner ON eInner.id = re.employee_id" +
+                "   WHERE eInner.id = e.id AND c.check_out_date IS NULL" +
+                " ) AS a) AS animals_watched" +
+                " FROM dbo.employee e" +
+                " INNER JOIN dbo.user_login_info uli ON uli.employee_id = e.id" +
+                " WHERE uli.user_type_id = 2" + (watcherId != null ? " AND e.id = @employeeId" : string.Empty);
+
+
+            List<Employee> employees = new();
+            using (SqlConnection sqlConnection = new(connectionString))
+            {
+                SqlCommand command = new(sql, sqlConnection);
+
+                if (watcherId != null)
+                {
+                    command.Parameters.AddWithValue("@employeeId", watcherId);
+                }
+                try
+                {
+                    await sqlConnection.OpenAsync();
+
+                    SqlDataReader reader = await command.ExecuteReaderAsync();
+
+                    while (reader.Read())
+                    {
+                        employees.Add(this.ReadEmployee(reader));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Server Error: " + ex.Message);
+                }
+            }
+
+            return employees;
+        }
+
+
+        private Employee ReadEmployee(SqlDataReader reader)
+        {
+            return new Employee()
+            {
+                Id = reader.GetInt64(0),
+                FirstName = reader.GetString(1),
+                LastName = reader.GetString(2),
+                Salary = reader.GetDecimal(3),
+                BirthDate = reader.GetDateTime(4),
+                Sex = reader.GetChar(5),
+                HiredSince = reader.GetDateTime(6),
+                PhotoPath = reader.GetString(7),
+                ResponsibleAnimalsAmount = reader.GetInt32(8)
+            };
         }
     }
 }

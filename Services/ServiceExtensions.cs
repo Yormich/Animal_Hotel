@@ -72,6 +72,7 @@ namespace Animal_Hotel.Services
             services.AddTransient<IEmployeeService, EmployeeService>();
             services.AddTransient<IClientService, ClientService>();
             services.AddTransient<IEnclosureService, EnclosureService>();
+            services.AddTransient<IBookingService, BookingService>();
         }
     }
 }
